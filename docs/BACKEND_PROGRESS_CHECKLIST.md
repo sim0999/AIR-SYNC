@@ -93,17 +93,34 @@ This document is the handoff for the person working on the `backend` branch on a
 - Do not fabricate air-quality readings or report model performance before validation.
 - Agree final merged layout and deployment routing together; a branch existing remotely does not mean its work is integrated into the deployable app.
 
+## Shared API agreement (fill in together before Phase 3)
+
+Do not treat these proposed route names or data definitions as final until both developers agree. Record the final contract here and in the frontend checklist.
+
+| Decision | Agreed value |
+|---|---|
+| Health route and response | Pending |
+| Observation route and response | Pending |
+| Prediction route and response | Pending |
+| AQI scale/category definition | Pending |
+| Pollutant names and units | Pending |
+| Timestamp format and timezone | Pending |
+| Status values (measured / estimated / demo / unavailable) | Pending |
+| Source and station fields | Pending |
+| Empty result and error response | Pending |
+| Local and deployed origin/routing | Pending |
+
 ## Backend starter prompt
 
 Copy the prompt below into the backend project workspace after checking out the `backend` branch:
 
-> You are working on the AirSync backend branch. Build the FastAPI backend for a hyperlocal air-quality mapping project initially focused on Delhi. The frontend is being developed separately on the `frontend` branch and must remain untouched by this backend task.
+> You are working on the AirSync `backend` branch. Build the FastAPI backend for a hyperlocal air-quality mapping project initially focused on Delhi. The frontend is being developed separately on the `frontend` branch and must remain untouched by this backend task.
 >
-> First inspect the existing repository and preserve all existing work. Do not assume files, providers, data, or model results exist unless the repository confirms them. Work on one phase at a time, update `docs/BACKEND_PROGRESS_CHECKLIST.md`, and stop at the end of the current phase for review before beginning the next.
+> First inspect the existing repository and preserve all existing work. Confirm this checklist is present in your workspace; if it is not, get it from the frontend developer or recreate it from the agreed plan before proceeding. Do not assume files, providers, data, or model results exist unless the repository confirms them. Work through the phases in `docs/BACKEND_PROGRESS_CHECKLIST.md` in order, completing and reviewing one phase before beginning the next. Update the checklist as you go and continue autonomously through phases that are unblocked.
 >
-> Start with Phase 1 only: establish or confirm the FastAPI app entry point, dependency/run instructions, a health endpoint, environment-based configuration, and an initial API response contract. Coordinate the route names and JSON fields with the frontend developer before treating the contract as final. Proposed routes are `GET /api/health` and, later, `GET /api/predict`; treat these as proposals until agreed.
+> Establish or confirm the FastAPI app entry point, dependency/run instructions, a health endpoint, environment-based configuration, and an initial API response contract. Coordinate route names and JSON fields with the frontend developer before treating the contract as final. Proposed routes are `GET /api/health` and `GET /api/predict`; treat these as proposals until agreed. Continue through data ingestion, API implementation, spatial baseline/evaluation, and integration readiness only when each phase's prerequisites are met.
 >
-> Keep the backend organized and document how to run it locally. Use explicit request/response models and clear error handling. Never commit API keys or secrets. Do not change frontend files or claim the frontend/backend branches are integrated.
+> Keep the backend organized and document how to run it locally. Use explicit request/response models and clear error handling. Never commit API keys or secrets. Do not change frontend files or claim the frontend/backend branches are integrated. Do not push, merge, or deploy unless explicitly asked.
 >
 > Air-quality integrity requirements:
 > - Preserve source, station identifier, coordinates, pollutant, units, and timestamps for observations.
@@ -112,6 +129,6 @@ Copy the prompt below into the backend project workspace after checking out the 
 > - Add ingestion and quality checks only after confirming data source availability, access terms, and schema.
 > - Build spatial estimation only when sufficient trusted data exist; start with an explainable baseline and validate it using spatially appropriate held-out data before exposing accuracy claims.
 >
-> At the end of Phase 1, summarize files changed, how to run the service, the health response, the proposed API contract, and any decisions needed from the frontend developer. Leave later phases unchecked until they are implemented and reviewed.
+> After each phase, summarize files changed, how to run or review the work, checklist status, and any decisions or blockers for the frontend developer. Leave a phase unchecked until it is implemented and its exit check is met. If an external decision or trustworthy data source is missing, do not fabricate one: document the blocker and continue only with independent, safe work.
 
 See [AirSync Project Plan](AirSync_Project_Plan.md) for the overall product scope and data integrity principles, and [Frontend Progress Checklist](FRONTEND_PROGRESS_CHECKLIST.md) for the frontend branch plan.
