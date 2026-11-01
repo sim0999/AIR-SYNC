@@ -1,61 +1,64 @@
 # AirSync Backend — Branch Checklist and Starter Prompt
 
-This document is the handoff for the person working on the `backend` branch on a separate machine. Work through one phase at a time, complete its exit check, and update this file as work is reviewed. The backend workspace has not been inspected in this audit, so its current implementation status must be confirmed by the backend developer.
+This document tracks implementation on the `backend` branch. Work through phases in order; when the project owner authorizes multi-phase work, advance independent pieces together and keep prerequisite-dependent items open. Update each status only with implementation evidence.
 
 ## Current status
 
 - **Branch:** `backend`
-- **Workspace status:** To be checked on the backend developer's machine.
-- **Current phase:** Phase 1 — Backend foundation
-- **Phase 1 status:** Not assessed; confirm repository contents before marking anything complete.
+- **Workspace status:** Inspected in the current checkout; backend foundation added.
+- **Current phase:** Phase 1 — Backend foundation and service contract
+- **Phase 1 status:** In progress; backend v1 routes are implemented and the frontend developer reports wiring them. Agreement on remaining contract details and cross-computer browser review are pending.
 
 ## Phase 1 — Backend foundation and service contract
 
-**Status:** Not assessed
+**Status:** In progress
 
-- [ ] Inspect the backend branch and preserve existing work.
-- [ ] Confirm Python/FastAPI version and dependency management approach.
-- [ ] Create or confirm the FastAPI application entry point and local run instructions.
-- [ ] Add a health endpoint, proposed as `GET /api/health` (coordinate the final path).
-- [ ] Define and document an initial response contract for observation/prediction data with the frontend developer.
-- [ ] Add configuration through environment variables where needed; do not commit secrets.
-- [ ] Confirm CORS and same-origin expectations for local development and eventual deployment.
+- [x] Inspect the backend branch and preserve existing work.
+- [x] Select Python dependency management with `requirements.txt`; Python 3.12 is available in this workspace.
+- [x] Create the FastAPI application entry point and local run instructions.
+- [x] Add and locally verify the proposed `GET /api/health` endpoint (HTTP 200).
+- [ ] Review and agree the proposed observation/prediction contract with the frontend developer.
+- [x] Read the optional `OPENAQ_API_KEY` from the environment; no key is stored in the repository. Remaining provider settings are passed as explicit adapter arguments.
+- [x] Default to same-origin; configure optional exact local CORS origins with `AIRSYNC_CORS_ORIGINS`. Final deployment agreement remains pending because frontend files are not present.
 
 **Exit check:** The service starts locally, health response works, and the frontend developer has an agreed API contract to build against.
 
 ## Phase 2 — Data sources and ingestion
 
-**Status:** Not started
+**Status:** Prepared but gated; the OpenAQ adapter/one-shot CLI are draft implementation and must not be enabled until Phase 1's shared contract and the source authorization/license review are complete.
 
-- [ ] Confirm permitted and practical sources for Delhi air-quality observations (for example CPCB/DPCC or OpenAQ, subject to availability and terms).
-- [ ] Record source, station ID, coordinates, pollutant, unit, and observation timestamp for each reading.
-- [ ] Document refresh cadence, source limitations, and missing-data behavior.
-- [ ] Handle time zones and units consistently.
-- [ ] Add quality checks for duplicates, invalid coordinates, missing fields, outliers, and stale readings.
+- [ ] Confirm OpenAQ as the project source, provide an authorized API key, and review the returned underlying provider/license terms.
+- [x] Preserve source, provider, station/sensor IDs, coordinates, pollutant, units, timestamp, and available attribution in normalized records.
+- [x] Document the adapter's one-shot behavior, local snapshot output, empty/failure behavior, and source limitations; refresh cadence remains pending.
+- [x] Record current validation, duplicate, outlier, and freshness handling in [Backend Data Quality](BACKEND_DATA_QUALITY.md).
+- [x] Normalize timestamps to UTC while preserving the source unit without conversion.
+- [ ] Complete quality policy for outliers and stale readings; adapter records rejection counts by reason, rejects malformed, negative, non-finite, coordinate-invalid, missing-required-field, and timestamps more than five minutes in the future, and deduplicates by station/sensor/timestamp. Stale readings are retained with timestamps; a freshness threshold remains pending.
 - [ ] Keep fixture/sample data clearly separated and labelled from live observations.
 
 **Exit check:** Ingested records are traceable to a source and timestamp, and data quality/freshness behavior is documented.
 
 ## Phase 3 — Read/query API
 
-**Status:** Not started; depends on Phase 1 contract and Phase 2 data availability.
+**Status:** Implemented behind an explicit source opt-in; shared contract approval and live-source credentials remain pending.
 
 - [ ] Implement the agreed observation/station endpoint(s).
-- [ ] Validate query parameters and return clear client errors for invalid input.
-- [ ] Return consistent units, timestamps, source identifiers, and data status.
-- [ ] Define empty-result and upstream-failure behavior.
-- [ ] Add the agreed `/api/predict` route only when its semantics and response fields are defined.
-- [ ] Keep API docs/examples aligned with actual response models.
+- [x] Validate `max_locations` and return a structured 422 error for invalid input.
+- [x] Return source units, UTC timestamps, source identifiers, and measured/unavailable status.
+- [x] Define empty-result, missing-credential, rate-limit, upstream-failure, and unexpected-error behavior.
+- [x] Define and implement the proposed `/api/predict` route as an explicit unavailable response until its model is validated and the frontend agrees to the contract.
+- [x] Enforce response-state consistency in the schemas: measured collections must have measured records and a source; unavailable collections cannot contain records; prediction value/method must match estimated versus unavailable status.
+- [x] Keep API docs/examples aligned with actual response models and error envelopes.
 
 **Exit check:** The frontend can consume the service using the documented contract for success, empty, and failure cases.
 
 ## Phase 4 — Spatial baseline and evaluation
 
-**Status:** Not started; requires sufficient trusted observations.
+**Status:** Baseline and snapshot-based holdout evaluation workflow implemented but not run; requires sufficient trusted observations before any estimate can be exposed.
 
-- [ ] Establish a transparent baseline such as inverse-distance weighting only if source coverage supports it.
-- [ ] Record model inputs, units, assumptions, and support/coverage limitations.
-- [ ] Validate using held-out locations, spatial block validation, or leave-one-station-out testing.
+- [x] Implement a guarded inverse-distance-weighting helper; keep it unavailable until source coverage is sufficient.
+- [x] Record model inputs, units, assumptions, and support/coverage limitations in `docs/BACKEND_DATA_QUALITY.md`.
+- [x] Add a leave-one-station-out evaluation CLI; it requires an explicit saved snapshot and freshness/support settings.
+- [ ] Run and review validation using held-out locations, spatial block validation, or leave-one-station-out testing.
 - [ ] Report suitable metrics such as MAE, RMSE, and bias with evaluation context.
 - [ ] Do not invent accuracy, confidence, or safety claims.
 - [ ] Return an explicit measured-versus-estimated indicator and coverage/status with every result.
@@ -64,12 +67,12 @@ This document is the handoff for the person working on the `backend` branch on a
 
 ## Phase 5 — Frontend integration and deployment readiness
 
-**Status:** Not started
+**Status:** Backend deployment preparation documented; frontend developer reports wiring the proposed routes in the separate frontend workspace. Cross-computer browser verification and remaining contract decisions are still pending.
 
 - [ ] Coordinate route names, schemas, units, timestamps, and CORS behavior with the frontend developer.
 - [ ] Verify local frontend-to-backend integration.
 - [ ] Confirm one combined deployment architecture with the frontend developer.
-- [ ] Configure production routing/runtime for the actual app structure.
+- [x] Prepare Vercel Python runtime configuration for the backend entry point; final combined frontend routing remains pending.
 - [ ] Review hosting limits against model size and inference time.
 - [ ] Verify deployed health and data routes and document required environment settings.
 
@@ -79,11 +82,11 @@ This document is the handoff for the person working on the `backend` branch on a
 
 | Phase | Status | Notes |
 |---|---|---|
-| 1. Backend foundation and service contract | Not assessed | Confirm backend branch contents first |
-| 2. Data sources and ingestion | Not started | |
-| 3. Read/query API | Not started | Depends on contract and data |
-| 4. Spatial baseline and evaluation | Not started | Depends on trusted observations |
-| 5. Frontend integration and deployment readiness | Not started | Coordinate with frontend developer |
+| 1. Backend foundation and service contract | In progress | Added `api/index.py`, `requirements.txt`, local instructions, and a draft contract. FastAPI 0.162.0/Uvicorn 0.54.0 returned HTTP 200 on the LAN address; the frontend developer reports wiring the proposed routes. Agreement on remaining response details remains outstanding. |
+| 2. Data sources and ingestion | Prepared (gated on Phase 1) | Draft OpenAQ v3 adapter and one-shot CLI added with bounded Delhi lookup, field validation, UTC normalization, duplicate rejection, coverage metadata, attribution retention, and rejection counts by reason. Quality/freshness behavior documented. Requires shared contract, authorized key, and provider/license review; no scheduled ingestion or persistence. |
+| 3. Read/query API | Implemented (source opt-in) | Added typed `/api/observations` and `/api/predict`, with schema checks preventing inconsistent measured/unavailable/estimated envelopes. Observations default unavailable; opt-in OpenAQ reads are bounded to five stations/one location page. Prediction always returns unavailable until a validated model is connected. Errors use structured 422, 500, 502, and 503 responses. Health, unavailable, and invalid-query responses verified; live fetch remains unverified because no key is configured. Contract still needs frontend agreement. |
+| 4. Spatial baseline and evaluation | Prepared (unevaluated) | Added guarded IDW, a snapshot-based leave-one-station-out CLI, and MAE/RMSE/bias reporting by pollutant/unit. No trusted readings exist in the workspace, so no evaluation metrics are reported and no estimate route is exposed. |
+| 5. Frontend integration and deployment readiness | Prepared (browser review pending) | Added `.python-version`, Vercel FastAPI deployment notes, and a 30-second function bound for the limited upstream call path. Frontend route wiring is reported by its developer but the files are in a separate workspace; LAN health, empty observations, 422 validation, and localhost:5500 CORS preflight were checked from this backend computer. No remote browser check or deployment was performed. |
 
 ## Branch coordination rules
 
@@ -97,18 +100,18 @@ This document is the handoff for the person working on the `backend` branch on a
 
 Do not treat these proposed route names or data definitions as final until both developers agree. Record the final contract here and in the frontend checklist.
 
-| Decision | Agreed value |
+| Decision | Backend proposal / current status |
 |---|---|
-| Health route and response | Pending |
-| Observation route and response | Pending |
-| Prediction route and response | Pending |
+| Health route and response | `GET /api/health` → `{"status":"ok","service":"airsync-api"}` |
+| Observation route and response | `GET /api/observations?max_locations=3` (1–5); status/source/observations/message envelope; frontend agreement pending |
+| Prediction route and response | Backend v1 proposal: `/api/predict` returns unavailable until model validation; frontend agreement pending |
 | AQI scale/category definition | Pending |
-| Pollutant names and units | Pending |
-| Timestamp format and timezone | Pending |
-| Status values (measured / estimated / demo / unavailable) | Pending |
-| Source and station fields | Pending |
-| Empty result and error response | Pending |
-| Local and deployed origin/routing | Pending |
+| Pollutant names and units | Provider names/units preserved; AQI mapping pending |
+| Timestamp format and timezone | Timezone-aware UTC ISO 8601 proposed |
+| Status values (measured / estimated / demo / unavailable) | Observation `measured`/`unavailable`; prediction unavailable until validated; frontend agreement pending |
+| Source and station fields | OpenAQ source/provider, station/sensor IDs, coordinates, coverage, and attribution |
+| Empty result and error response | Unavailable empty list; structured error envelope implemented; frontend agreement pending |
+| Local and deployed origin/routing | Same-origin default; local CORS uses `AIRSYNC_CORS_ORIGINS`; combined deployment pending |
 
 ## Backend starter prompt
 

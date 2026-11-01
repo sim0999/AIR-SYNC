@@ -105,20 +105,20 @@ This document is for the person working on the `frontend` branch in the frontend
 
 ## Shared API agreement (fill in together before Phase 5)
 
-These are decisions for both developers; the frontend should not guess them and the backend should not silently change them.
+The table below is the backend's concrete v1 proposal for frontend review. It is not marked as agreed until the frontend developer confirms or edits it; the frontend should not silently assume a final contract from a proposal.
 
-| Decision | Agreed value |
+| Decision | Backend proposal / current status |
 |---|---|
-| Health route and response | Pending |
-| Observation route and response | Pending |
-| Prediction route and response | Pending |
-| AQI scale/category definition | Pending |
-| Pollutant names and units | Pending |
-| Timestamp format and timezone | Pending |
-| Status values (measured / estimated / demo / unavailable) | Pending |
-| Source and station fields | Pending |
-| Empty result and error response | Pending |
-| Local and deployed origin/routing | Pending |
+| Health route and response | Proposal: `GET /api/health` → `{"status":"ok","service":"airsync-api"}` |
+| Observation route and response | Proposal: `GET /api/observations?max_locations=3` (1–5); response has `status`, `source`, `observations`, and `message`; unavailable returns an empty list |
+| Prediction route and response | Proposal: `GET /api/predict?latitude=…&longitude=…&pollutant=…`; returns `status: unavailable`, `prediction: null` until a model is validated |
+| AQI scale/category definition | Pending; no AQI scale or category conversion is implemented |
+| Pollutant names and units | Use provider's pollutant names and units; preserve units without conversion |
+| Timestamp format and timezone | Timezone-aware UTC ISO 8601 |
+| Status values (measured / estimated / demo / unavailable) | Observation responses: `measured` or `unavailable`; prediction may be `estimated` only after validation; no demo records are served |
+| Source and station fields | Source/provider, station and sensor IDs, coordinates, pollutant, unit, timestamp, coverage and attribution where provided |
+| Empty result and error response | Empty results use `status: unavailable`; errors use `{error:{code,message,field_errors?}}`; 422 invalid request, 502 upstream failure, 503 credential/rate-limit issue, 500 unexpected error |
+| Local and deployed origin/routing | Same-origin in production; local exact origins may be set with `AIRSYNC_CORS_ORIGINS`; Vercel backend config is present, combined frontend app is not |
 
 Record the final agreement here and in the backend's API docs before wiring frontend API calls.
 

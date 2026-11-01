@@ -1,16 +1,16 @@
 # AirSync Project Progress Checklist
 
 **Last reviewed:** 2026-11-01  
-**Working branch:** `frontend`  
-**Rule:** Complete and review one phase before starting the next. Update this checklist as work is completed; do not mark planned or documented work as implemented.
+**Working branch:** `backend`
+**Rule:** Keep implementation and status evidence current. When the user authorizes multi-phase work, advance independent pieces together and leave dependent items open.
 
 ## Current project snapshot
 
 - [x] Reviewed the repository contents, existing project plan, and Git state.
 - [x] Recorded an implementation checklist organized into sequential phases.
-- [ ] Phase 1 — UI foundation (next phase; not started).
+- [ ] Frontend implementation (not started).
 
-At review, the workspace contains a zero-byte root `index.html`, a minimal `README.md`, and `docs/AirSync_Project_Plan.md`. There is no frontend CSS/JavaScript, backend source, test suite, data pipeline, or deployment configuration in the workspace. The project plan is a specification, not evidence those features exist. Git is on `frontend` at the initial commit; remote refs for `main`, `frontend`, and `backend` are present, but their project contents were not examined as part of this workspace audit.
+The current checkout is on `backend`. The repository now includes a FastAPI service with health and observations routes, a gated OpenAQ v3 adapter/CLI, draft response schemas, an unevaluated IDW and leave-one-station-out helper, and Vercel backend preparation. There are still no frontend source files, no authorized OpenAQ key, no ingested observations, no validated estimates, and no combined deployment. The backend-specific status and evidence are tracked in [Backend Progress Checklist](BACKEND_PROGRESS_CHECKLIST.md).
 
 ## Phase 1 — UI foundation
 
@@ -67,13 +67,14 @@ At review, the workspace contains a zero-byte root `index.html`, a minimal `READ
 
 ## Phase 5 — Data source and backend contract
 
-**Status:** Not started  
+**Status:** Backend foundation and API proposal implemented; frontend integration and live-source activation remain pending.
+
 **Goal:** Establish trustworthy inputs and a real API contract before presenting live data.
 
 - [ ] Confirm data providers, permissions, fields, units, timestamp conventions, and refresh expectations with the project team.
-- [ ] Define the FastAPI response contract for health and prediction/observation data.
-- [ ] Implement backend ingestion and quality checks for source, station, coordinates, pollutant, units, and timestamp.
-- [ ] Document missing values, duplicates, outliers, and freshness behavior.
+- [x] Define a proposed FastAPI response contract for health and observations; frontend agreement remains pending.
+- [x] Implement an opt-in OpenAQ adapter and quality checks for source, station, coordinates, pollutant, units, and timestamp.
+- [x] Document missing values, duplicates, outliers, and freshness behavior; live data source authorization remains pending.
 - [ ] Add a frontend API module using relative paths such as `/api/predict`.
 - [ ] Handle loading, success, empty, and failure responses without fabricating measurements.
 
@@ -81,12 +82,16 @@ At review, the workspace contains a zero-byte root `index.html`, a minimal `READ
 
 ## Phase 6 — Spatial estimation and validation
 
-**Status:** Not started  
+**Status:** Baseline and validation helpers implemented; not evaluated because no trusted observations are available.
+
 **Goal:** Produce estimates only through a documented and evaluated method.
 
-- [ ] Establish a simple explainable baseline such as inverse-distance weighting where data support it.
+- [x] Add an explainable IDW baseline helper with explicit support/freshness requirements; it is not exposed by the API.
+- [x] Document model inputs, units, assumptions, and support limitations.
 - [ ] Compare more complex models only when justified by data and evaluation.
-- [ ] Validate with held-out locations, spatial block validation, or leave-one-station-out testing.
+- [x] Add leave-one-station-out and MAE/RMSE/bias calculation helpers.
+- [x] Add a snapshot-based evaluation command that reports metrics by pollutant and unit.
+- [ ] Run spatial holdout evaluation; no evaluation has been run without observations.
 - [ ] Report appropriate metrics such as MAE, RMSE, and bias, with method and evaluation context.
 - [ ] Show coverage/limitations; do not imply estimates are measurements or that a location is safe.
 
@@ -108,7 +113,8 @@ At review, the workspace contains a zero-byte root `index.html`, a minimal `READ
 
 ## Phase 8 — Deployment
 
-**Status:** Not started  
+**Status:** Backend deployment preparation documented; no combined deployment has been performed.
+
 **Goal:** Deploy one complete AirSync application using the agreed hosting architecture.
 
 - [ ] Agree the merged branch and final frontend/backend layout.
@@ -124,19 +130,19 @@ At review, the workspace contains a zero-byte root `index.html`, a minimal `READ
 
 | Phase | Status | Review notes |
 |---|---|---|
-| Project audit and checklist | Complete | Current workspace inventoried; implementation has not begun. |
+| Project audit and checklist | Complete | Repository and backend branch inspected. |
 | 1. UI foundation | Not started | Next phase. |
 | 2. Interactive map | Not started | |
 | 3. AQI dashboard | Not started | |
 | 4. Search and device location | Not started | |
-| 5. Data source and backend contract | Not started | |
-| 6. Spatial estimation and validation | Not started | |
-| 7. Integration and product quality | Not started | |
-| 8. Deployment | Not started | |
+| 5. Data source and backend contract | Partial | API envelope and opt-in OpenAQ adapter exist; no key/records and no frontend agreement. |
+| 6. Spatial estimation and validation | Partial (unevaluated) | IDW and leave-one-station-out metric helpers exist; no estimates or metrics reported. |
+| 7. Integration and product quality | Not started | Frontend files are not present. |
+| 8. Deployment | Prepared (backend only) | Vercel backend configuration documented; combined app not deployed. |
 
 ## Update protocol
 
-1. Work only on the current phase.
+1. Prefer phase order; when the user authorizes multi-phase work, advance independent pieces together and leave dependent items open.
 2. Check off an item only after it is implemented and reviewed.
 3. Add concise evidence or known gaps to that phase's review notes.
 4. Move the “next phase” marker only after the current phase meets its exit check.
