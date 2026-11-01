@@ -103,4 +103,39 @@ This document is for the person working on the `frontend` branch in the frontend
 - Use demo fixtures only when clearly labelled; never present them as real air-quality observations.
 - Merge branches only when both sides are ready and the integration structure has been agreed.
 
+## Shared API agreement (fill in together before Phase 5)
+
+These are decisions for both developers; the frontend should not guess them and the backend should not silently change them.
+
+| Decision | Agreed value |
+|---|---|
+| Health route and response | Pending |
+| Observation route and response | Pending |
+| Prediction route and response | Pending |
+| AQI scale/category definition | Pending |
+| Pollutant names and units | Pending |
+| Timestamp format and timezone | Pending |
+| Status values (measured / estimated / demo / unavailable) | Pending |
+| Source and station fields | Pending |
+| Empty result and error response | Pending |
+| Local and deployed origin/routing | Pending |
+
+Record the final agreement here and in the backend's API docs before wiring frontend API calls.
+
 See [AirSync Project Plan](AirSync_Project_Plan.md) for product scope and data-integrity principles, and [Backend Progress Checklist](BACKEND_PROGRESS_CHECKLIST.md) for the other branch's work plan and starter prompt.
+
+## Frontend autonomous-work prompt
+
+Copy this prompt into Codex in the frontend workspace when you want it to carry out the frontend plan:
+
+> Work on AirSync's `frontend` branch in this workspace. Implement the frontend plan in `docs/FRONTEND_PROGRESS_CHECKLIST.md`, using `docs/AirSync_Project_Plan.md` for product scope and data integrity rules. First inspect the repository and preserve existing work. Do not modify backend implementation or switch branches.
+>
+> Work through the frontend phases in order, one phase at a time. Finish the current phase's checklist and exit check before starting the next phase; update the checklist as you go. Continue autonomously through phases that are unblocked. If a decision, credential, data source, or backend contract is required and cannot be inferred safely, record the blocker and continue with independent frontend work without inventing a value or contract.
+>
+> Build the UI with separate HTML, CSS, and JavaScript files. Keep the app understandable and accessible. Use demo fixtures only when clearly labelled as demo. Never present sample values as live observations, claim an estimate is accurate without validation, or imply that a place is safe.
+>
+> For the map, use Leaflet/OpenStreetMap as specified in the project plan. For location search, do not select a paid/provider-specific geocoder or embed a key without an agreed provider and configuration. Browser geolocation should explain permission and failure states.
+>
+> Before API integration, coordinate with the backend developer and use only the agreed routes, response fields, units, timestamps, and measured/estimated status. Keep calls configurable and use relative same-origin paths where the agreed deployment supports them. Handle loading, empty, and error responses.
+>
+> After each phase, summarize the changes, what was reviewed, checklist status, and any blocker. Do not claim work is complete unless the phase exit check is met. Do not push, merge, or deploy unless explicitly asked.
