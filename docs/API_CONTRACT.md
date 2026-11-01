@@ -23,13 +23,22 @@ Returns HTTP 200 when the service is responding. The running backend returned:
 ```json
 {
   "status": "measured | unavailable",
-  "source": "provider name or null",
+  "source": "OpenAQ or null",
   "observations": [],
   "message": "Human-readable status"
 }
 ```
 
-When observations are unavailable, return `status: "unavailable"` and an empty `observations` array. The currently running backend returned HTTP 200 with this unavailable form because its live source is disabled.
+When observations are unavailable, return HTTP 200 with `status: "unavailable"` and an empty `observations` array. The currently running backend returns:
+
+```json
+{
+  "status": "unavailable",
+  "source": null,
+  "observations": [],
+  "message": "Live observation source is disabled."
+}
+```
 
 Each returned observation has these fields:
 
@@ -62,7 +71,21 @@ Other errors use the same `error.code` and `error.message` envelope: 503 for cre
 
 ## `GET /api/predict?latitude=…&longitude=…&pollutant=…`
 
-Until a model has passed the documented validation review, return `status: "unavailable"`, `prediction: null`, `unit: null`, and a message explaining why no estimate is provided. Do not label an unavailable result as measured.
+Until a model has passed the documented validation review, return this unavailable response. Do not label an unavailable result as measured:
+
+```json
+{
+  "status": "unavailable",
+  "latitude": 28.61,
+  "longitude": 77.21,
+  "pollutant": "PM2.5",
+  "prediction": null,
+  "unit": null,
+  "method": null,
+  "coverage": null,
+  "message": "No validated spatial model is available; no estimate is provided."
+}
+```
 
 If a validated model is connected later, return `status: "estimated"` and include the numeric `prediction`, its top-level `unit`, and `method`/`coverage` details. The frontend withholds an estimate if the unit is missing.
 

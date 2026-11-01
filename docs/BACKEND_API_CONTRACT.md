@@ -61,7 +61,7 @@ With the feature enabled and an authorized `OPENAQ_API_KEY`, it requests latest 
   "value": 0,
   "unit": "<source-defined unit>",
   "observed_at": "<ISO 8601 timestamp with offset or Z>",
-  "source": "<provider identifier>",
+  "source": "OpenAQ",
   "provider": "<underlying data provider or null>",
   "station": {
     "id": "<provider station identifier>",
