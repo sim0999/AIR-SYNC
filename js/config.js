@@ -1,7 +1,7 @@
 window.AIRSYNC_CONFIG = Object.freeze({
   // Leave empty for same-origin API routes in a combined deployment.
-  // For separate local machines, set this to the backend machine's reachable origin.
-  apiBaseUrl: "",
+  // Backend developer's LAN address; use same-origin routing in a combined deployment.
+  apiBaseUrl: "http://192.168.160.226:8000",
   observationLimit: 3,
   defaultLocation: Object.freeze({
     latitude: 28.6139,

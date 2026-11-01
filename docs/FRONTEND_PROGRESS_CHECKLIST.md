@@ -6,7 +6,7 @@ This document is for the person working on the `frontend` branch in the frontend
 
 - **Branch:** `frontend`
 - **Workspace reviewed:** `C:\Users\ry105\OneDrive\Desktop\New folder\AIR-SYNC`
-- **Current phase:** Phase 5 — Backend API integration (implemented; live backend review pending)
+- **Current phase:** Phase 5 — Backend API integration (wired to teammate's LAN backend; reachability review pending)
 - **Phase 1 status:** Complete
 - **Audit finding:** The workspace initially had no frontend implementation. Phase 1 now has a root page with separate CSS and JavaScript files.
 
@@ -67,7 +67,7 @@ This document is for the person working on the `frontend` branch in the frontend
 
 ## Phase 5 — Backend API integration
 
-**Status:** In progress — frontend wired to the backend developer's proposed contract; backend is not reachable from this machine at `127.0.0.1:8000`.
+**Status:** In progress — frontend wired to the backend developer's proposed contract and LAN address `http://192.168.160.226:8000`; this environment could not verify network access.
 
 - [x] Record the backend developer's proposed route names, response shape, status semantics, and source units below.
 - [x] Add a dedicated API module for `/api/health`, `/api/observations?max_locations=3`, and `/api/predict`.
@@ -125,7 +125,7 @@ These are decisions for both developers; the frontend should not guess them and 
 | Status values (measured / estimated / demo / unavailable) | Source readings use `measured`; prediction only `estimated` after validated model; currently `unavailable`; demo overlays are frontend-only |
 | Source and station fields | Observation: `status`, `pollutant`, `value`, `unit`, `observed_at`, `source`, `provider`, `station`, `attribution`, `coverage`; station: `id`, `name`, `latitude`, `longitude`, `sensor_id` |
 | Empty result and error response | Observation collection may be unavailable and includes `message`; standard HTTP/error JSON shape still to confirm |
-| Local and deployed origin/routing | Proposed local backend `http://127.0.0.1:8000`; configurable `AIRSYNC_CONFIG.apiBaseUrl`, empty for same-origin; separate machine requires reachable host and CORS/proxy setup |
+| Local and deployed origin/routing | Teammate reports backend at `http://192.168.160.226:8000`; configurable `AIRSYNC_CONFIG.apiBaseUrl`; their CORS preflight allows `http://localhost:5500`; this environment's network check was blocked |
 
 This table records the backend developer's proposal, not final joint sign-off. Confirm it in backend documentation before treating the contract as final.
 

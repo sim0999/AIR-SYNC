@@ -14,7 +14,7 @@
 - [x] Phase 4 — Search and device location (Nominatim search and geolocation support implemented; browser-reviewed).
 - [ ] Phase 5 — Frontend API integration (wired to backend teammate's proposed contract; end-to-end connection review pending).
 
-At the initial audit, the workspace contained a zero-byte root `index.html`, a minimal `README.md`, and project documentation. Phases 1–4 were implemented and reviewed in a browser. Phase 5 now wires the frontend to the backend teammate's proposed contract: `/api/health`, `/api/observations`, and `/api/predict`. The health check at the proposed local URL `127.0.0.1:8000` could not connect from this machine, so live end-to-end review remains open. Separate-machine development needs a reachable backend address and suitable CORS or proxy configuration. AQI remains uncalculated pending a team-selected scale.
+At the initial audit, the workspace contained a zero-byte root `index.html`, a minimal `README.md`, and project documentation. Phases 1–4 were implemented and reviewed in a browser. Phase 5 wires the frontend to the backend teammate's proposed contract: `/api/health`, `/api/observations`, and `/api/predict`, using `http://192.168.160.226:8000` as its configured API origin. The backend teammate reports successful health/observations responses and CORS preflight for `http://localhost:5500`; this environment could not verify network reachability because outbound socket access is restricted here. AQI remains uncalculated pending a team-selected scale.
 
 ## Phase 1 — UI foundation
 
@@ -137,7 +137,7 @@ At the initial audit, the workspace contained a zero-byte root `index.html`, a m
 | 2. Interactive map | Complete | Browser preview confirmed OSM tiles, zoom control, demo marker popup, and visible attribution. |
 | 3. AQI dashboard | Complete | Browser review confirmed demo values, approximate map-centre location, demo-fixture source, unavailable timestamp, and unavailable coverage. |
 | 4. Search and device location | Complete | Nominatim search and map selection reviewed with a Delhi query. Device permission remains user-triggered and was not invoked during review. |
-| 5. Data source and backend contract | In progress | Frontend integration follows teammate's proposal; backend is unreachable at `127.0.0.1:8000` from this machine, and AQI scale remains undecided. |
+| 5. Data source and backend contract | In progress | Frontend points to teammate's LAN backend; access could not be verified in this environment. Teammate reports observations are unavailable pending OpenAQ configuration; AQI scale remains undecided. |
 | 6. Spatial estimation and validation | Not started | |
 | 7. Integration and product quality | Not started | |
 | 8. Deployment | Not started | |
