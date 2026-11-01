@@ -6,7 +6,7 @@ This document is for the person working on the `frontend` branch in the frontend
 
 - **Branch:** `frontend`
 - **Workspace reviewed:** `C:\Users\ry105\OneDrive\Desktop\New folder\AIR-SYNC`
-- **Current phase:** Phase 5 — Backend API integration (next; contract needed)
+- **Current phase:** Phase 5 — Backend API integration (blocked on backend contract)
 - **Phase 1 status:** Complete
 - **Audit finding:** The workspace initially had no frontend implementation. Phase 1 now has a root page with separate CSS and JavaScript files.
 
@@ -67,7 +67,7 @@ This document is for the person working on the `frontend` branch in the frontend
 
 ## Phase 5 — Backend API integration
 
-**Status:** Not started; depends on the backend response contract being agreed.
+**Status:** Blocked — checked `origin/backend`; it currently contains only `README.md` and project documentation, with no FastAPI implementation or API contract.
 
 - [ ] Agree the JSON response shape and route names with the backend developer before wiring the UI.
 - [ ] Add a dedicated API module and use same-origin/relative routes such as `/api/health` and `/api/predict` if agreed.
@@ -97,7 +97,7 @@ This document is for the person working on the `frontend` branch in the frontend
 | 2. Interactive map | Complete | OSM tiles loaded; zoom controls and a demo marker popup reviewed in browser; attribution visible |
 | 3. AQI dashboard | Complete | Browser review confirmed demo values, approximate map-centre location, demo-fixture source, unavailable timestamp, and unavailable coverage |
 | 4. Search and device location | Complete | Nominatim place search and map selection reviewed with a Delhi query; device permission path remains user-triggered and was not invoked during review. |
-| 5. Backend API integration | Blocked on contract | Next phase; agree JSON fields/routes with backend developer |
+| 5. Backend API integration | Blocked | Backend branch currently has no API implementation/contract; agree routes and JSON fields with backend developer |
 | 6. Accessibility and integration readiness | Not started | |
 
 ## Branch coordination rules

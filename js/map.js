@@ -1,11 +1,11 @@
-const delhiCenter = [28.6139, 77.209];
+const defaultLocation = window.AIRSYNC_CONFIG.defaultLocation;
 const mapElement = document.querySelector("#air-map");
 
 if (mapElement && window.L) {
   const airMap = L.map(mapElement, {
-    center: delhiCenter,
+    center: [defaultLocation.latitude, defaultLocation.longitude],
     zoom: 11,
-    minZoom: 9,
+    minZoom: 3,
     maxZoom: 18,
     scrollWheelZoom: false,
     zoomControl: true,
@@ -19,6 +19,10 @@ if (mapElement && window.L) {
   }).addTo(airMap);
 
   const demoOverlayLayer = L.layerGroup().addTo(airMap);
+  const measuredObservationLayer = L.layerGroup();
+  const selectedLocationLayer = L.layerGroup();
+  let hasUserSelectedLocation = false;
+
   const estimateZone = L.polygon(
     [
       [28.665, 77.145],
@@ -62,18 +66,167 @@ if (mapElement && window.L) {
       );
   });
 
+  function setLegendMode(mode) {
+    const demoStationLegend = document.querySelector("#demo-station-legend");
+    const estimateLegend = document.querySelector("#estimate-area-legend");
+    const measuredLegend = document.querySelector("#measured-station-legend");
+    const selectedLegend = document.querySelector("#device-location-legend");
+    const modeLabel = document.querySelector("#map-data-mode");
+    const legendNote = document.querySelector("#map-legend-note");
+
+    demoStationLegend.hidden = mode !== "demo";
+    estimateLegend.hidden = mode !== "demo";
+    measuredLegend.hidden = mode !== "measured";
+    selectedLegend.hidden = mode !== "selected";
+
+    if (mode === "demo") {
+      modeLabel.textContent = "DEMO OVERLAYS";
+      legendNote.textContent = "No live readings or validated estimates";
+    } else if (mode === "measured") {
+      modeLabel.textContent = "MEASURED OBSERVATIONS";
+      legendNote.textContent = "Select a marker to inspect its source readings";
+    } else {
+      modeLabel.textContent = "SELECTED LOCATION";
+      legendNote.textContent = "No station readings linked to this location";
+    }
+  }
+
+  function showDemoOverlays() {
+    if (hasUserSelectedLocation) {
+      return;
+    }
+
+    if (airMap.hasLayer(measuredObservationLayer)) {
+      airMap.removeLayer(measuredObservationLayer);
+    }
+    if (!airMap.hasLayer(demoOverlayLayer)) {
+      demoOverlayLayer.addTo(airMap);
+    }
+    setLegendMode("demo");
+  }
+
+  function formatTimestamp(value) {
+    if (!value) {
+      return "Timestamp unavailable";
+    }
+    const timestamp = new Date(value);
+    return Number.isNaN(timestamp.getTime())
+      ? "Timestamp unavailable"
+      : timestamp.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, " UTC");
+  }
+
+  function createObservationPopup(station, observations, collectionSource) {
+    const popup = document.createElement("div");
+    const title = document.createElement("strong");
+    title.className = "map-popup-title";
+    title.textContent = station.name || "Measured station";
+    popup.append(title);
+
+    const state = document.createElement("span");
+    state.className = "map-popup-label";
+    state.textContent = "MEASURED SOURCE DATA";
+    popup.append(state);
+
+    observations.forEach((observation) => {
+      const line = document.createElement("p");
+      const reading = observation.value == null ? "Value unavailable" : String(observation.value);
+      const unit = observation.unit ? ` ${observation.unit}` : "";
+      line.textContent = `${observation.pollutant || "Pollutant"}: ${reading}${unit} · ${formatTimestamp(observation.observed_at)}`;
+      popup.append(line);
+    });
+
+    const provenance = document.createElement("span");
+    const provider = observations.find((item) => item.provider)?.provider;
+    const source = observations.find((item) => item.source)?.source || collectionSource;
+    provenance.textContent = [provider, source].filter(Boolean).join(" · ") || "Source not provided";
+    popup.append(provenance);
+
+    const attributionValue = observations.find((item) => item.attribution)?.attribution;
+    if (attributionValue) {
+      const attribution = document.createElement("p");
+      attribution.textContent = Array.isArray(attributionValue)
+        ? attributionValue.join(" · ")
+        : String(attributionValue);
+      popup.append(attribution);
+    }
+
+    return popup;
+  }
+
+  function showMeasuredObservations(observations, collectionSource) {
+    const stationGroups = new Map();
+
+    observations
+      .filter((observation) => observation?.status === "measured" && observation.station)
+      .forEach((observation) => {
+        const latitude = Number(observation.station.latitude);
+        const longitude = Number(observation.station.longitude);
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+          return;
+        }
+
+        const key = observation.station.id || `${latitude},${longitude}`;
+        const existing = stationGroups.get(key);
+        if (existing) {
+          existing.observations.push(observation);
+        } else {
+          stationGroups.set(key, {
+            station: { ...observation.station, latitude, longitude },
+            observations: [observation],
+          });
+        }
+      });
+
+    if (stationGroups.size === 0 || hasUserSelectedLocation) {
+      showDemoOverlays();
+      return 0;
+    }
+
+    if (airMap.hasLayer(demoOverlayLayer)) {
+      airMap.removeLayer(demoOverlayLayer);
+    }
+    measuredObservationLayer.clearLayers();
+
+    stationGroups.forEach(({ station, observations: stationObservations }) => {
+      const marker = L.circleMarker([station.latitude, station.longitude], {
+        radius: 8,
+        color: "#fffefa",
+        weight: 3,
+        fillColor: "#557a60",
+        fillOpacity: 1,
+      }).addTo(measuredObservationLayer);
+
+      marker.bindPopup(createObservationPopup(station, stationObservations, collectionSource));
+      marker.on("click", () => {
+        window.dispatchEvent(
+          new CustomEvent("airsync:stationselect", {
+            detail: { station, observations: stationObservations, source: collectionSource },
+          }),
+        );
+      });
+    });
+
+    measuredObservationLayer.addTo(airMap);
+    setLegendMode("measured");
+    return stationGroups.size;
+  }
+
   let selectedLocationMarker;
   window.addEventListener("airsync:locationchange", ({ detail }) => {
-    const position = [detail.latitude, detail.longitude];
+    const position = [Number(detail.latitude), Number(detail.longitude)];
     if (!position.every(Number.isFinite)) {
       return;
     }
 
+    hasUserSelectedLocation = true;
     airMap.setView(position, 13);
 
-    if (selectedLocationMarker) {
-      selectedLocationMarker.remove();
-    }
+    [demoOverlayLayer, measuredObservationLayer, selectedLocationLayer].forEach((layer) => {
+      if (airMap.hasLayer(layer)) {
+        airMap.removeLayer(layer);
+      }
+    });
+    selectedLocationLayer.clearLayers();
 
     selectedLocationMarker = L.circleMarker(position, {
       radius: 8,
@@ -81,7 +234,7 @@ if (mapElement && window.L) {
       weight: 3,
       fillColor: "#3f7190",
       fillOpacity: 1,
-    }).addTo(airMap);
+    }).addTo(selectedLocationLayer);
 
     const popupContent = document.createElement("div");
     const popupTitle = document.createElement("strong");
@@ -89,24 +242,19 @@ if (mapElement && window.L) {
     popupTitle.textContent = detail.label || "Selected location";
     const popupMessage = document.createElement("span");
     popupMessage.textContent =
-      "The displayed air-quality values are demo data and do not describe current conditions here.";
+      "The displayed air-quality values are not a current measurement for this location.";
     popupContent.append(popupTitle, popupMessage);
     selectedLocationMarker.bindPopup(popupContent);
+    selectedLocationLayer.addTo(airMap);
 
-    if (airMap.hasLayer(demoOverlayLayer)) {
-      airMap.removeLayer(demoOverlayLayer);
-    }
-
-    document.querySelector("#demo-station-legend").hidden = true;
-    document.querySelector("#estimate-area-legend").hidden = true;
-    document.querySelector("#device-location-legend").hidden = false;
+    setLegendMode("selected");
     document.querySelector("#selected-location-legend-label").textContent =
       detail.source === "device" ? "Your device location" : "Selected place";
-    document.querySelector("#map-legend-note").textContent =
-      "No air-quality measurements for this location";
     mapElement.setAttribute(
       "aria-label",
-      "Interactive map centred on the selected location. Air-quality information is demo-only.",
+      "Interactive map centred on the selected location. Air-quality values depend on backend data availability.",
     );
   });
+
+  window.airSyncMap = Object.freeze({ showMeasuredObservations, showDemoOverlays });
 }

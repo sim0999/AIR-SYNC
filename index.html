@@ -29,9 +29,10 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
-    <script src="js/map.js" defer></script>
     <script src="js/config.js" defer></script>
+    <script src="js/map.js" defer></script>
     <script src="js/location.js" defer></script>
+    <script src="js/api.js" defer></script>
     <script src="js/app.js" defer></script>
   </head>
   <body>
@@ -105,49 +106,54 @@
             <p class="eyebrow"><span class="eyebrow-line"></span> YOUR AREA</p>
             <h2 id="air-title">A snapshot of the air</h2>
           </div>
-          <span class="demo-badge"><span aria-hidden="true">ⓘ</span> DEMO DATA</span>
+          <span class="demo-badge" id="data-status-badge"><span aria-hidden="true">ⓘ</span> CONNECTING TO API</span>
         </div>
 
         <div class="dashboard-grid">
-          <article class="aqi-card" aria-label="Demonstration air quality index">
+          <article class="aqi-card" aria-label="Air quality index status">
             <div class="aqi-card-top">
               <span class="card-label">AIR QUALITY INDEX</span>
-              <span class="status-pill"><span class="status-dot"></span> Sample</span>
+              <span class="status-pill"><span class="status-dot"></span> <span id="aqi-status">Not calculated</span></span>
             </div>
-            <div class="aqi-reading"><strong>87</strong><span class="aqi-category">Moderate</span></div>
-            <p class="aqi-note">Illustrative value only · not a live reading</p>
-            <div class="aqi-scale" aria-label="Illustrative AQI scale">
-              <span class="scale-segment scale-good"></span><span class="scale-segment scale-moderate"></span><span class="scale-segment scale-high"></span><span class="scale-segment scale-very-high"></span>
-              <span class="scale-marker" aria-hidden="true"></span>
-            </div>
-            <div class="scale-labels"><span>Good</span><span>Moderate</span><span>Poor</span><span>Very poor</span></div>
+            <div class="aqi-reading"><strong id="aqi-value">—</strong><span class="aqi-category" id="aqi-category">Scale pending</span></div>
+            <p class="aqi-note" id="aqi-note">The project has not selected an AQI scale. No AQI value or category is calculated.</p>
+            <div class="aqi-pending" role="note">Raw pollutant observations are shown separately in their source units.</div>
           </article>
 
           <article class="pollutant-card">
-            <div class="card-label">POLLUTANTS <span class="muted-label">· SAMPLE VALUES</span></div>
+            <div class="card-label">POLLUTANT OBSERVATIONS <span class="muted-label" id="observation-status-label">· WAITING FOR BACKEND</span></div>
             <div class="pollutant-row">
               <div class="pollutant-icon pm25">2.5</div>
-              <div class="pollutant-name"><strong>PM2.5</strong><span>Fine particles</span></div>
-              <div class="pollutant-value">31 <small>µg/m³</small></div>
+              <div class="pollutant-info">
+                <div class="pollutant-name"><strong>PM2.5</strong><span>Fine particles</span></div>
+                <span class="pollutant-observation-status" id="pm25-observation-status">Select a measured station</span>
+                <span class="pollutant-estimate-status" id="pm25-estimate-status">Estimate not requested</span>
+              </div>
+              <div class="pollutant-value"><span id="pm25-value">—</span> <small id="pm25-unit"></small></div>
             </div>
             <div class="pollutant-divider"></div>
             <div class="pollutant-row">
               <div class="pollutant-icon pm10">10</div>
-              <div class="pollutant-name"><strong>PM10</strong><span>Coarse particles</span></div>
-              <div class="pollutant-value">54 <small>µg/m³</small></div>
+              <div class="pollutant-info">
+                <div class="pollutant-name"><strong>PM10</strong><span>Coarse particles</span></div>
+                <span class="pollutant-observation-status" id="pm10-observation-status">Select a measured station</span>
+                <span class="pollutant-estimate-status" id="pm10-estimate-status">Estimate not requested</span>
+              </div>
+              <div class="pollutant-value"><span id="pm10-value">—</span> <small id="pm10-unit"></small></div>
             </div>
-            <p class="pollutant-footnote">Sample values shown for layout preview</p>
+            <p class="pollutant-footnote" id="observations-message" role="status" aria-live="polite">Connecting to the observations API…</p>
           </article>
 
           <article class="map-card" id="explore" aria-labelledby="map-title">
               <div class="map-card-heading">
               <div><span class="card-label">INTERACTIVE MAP</span><h3 id="map-title">Delhi air quality map</h3></div>
-              <span class="map-placeholder-tag">DEMO OVERLAYS</span>
+              <span class="map-placeholder-tag" id="map-data-mode">DEMO OVERLAYS</span>
             </div>
             <div id="air-map" class="leaflet-map" role="application" aria-label="Interactive map centred on Delhi. Use arrow keys to pan and plus or minus keys to zoom."></div>
             <div class="map-legend" aria-label="Map legend">
               <span class="map-legend-item" id="demo-station-legend"><i class="legend-station" aria-hidden="true"></i> Demo station marker</span>
               <span class="map-legend-item" id="estimate-area-legend"><i class="legend-estimate" aria-hidden="true"></i> Illustrative estimate area</span>
+              <span class="map-legend-item" id="measured-station-legend" hidden><i class="legend-station" aria-hidden="true"></i> Measured station</span>
               <span class="map-legend-item" id="device-location-legend" hidden><i class="legend-device" aria-hidden="true"></i> <span id="selected-location-legend-label">Selected location</span></span>
               <span class="map-legend-note" id="map-legend-note">No live readings or validated estimates</span>
             </div>
@@ -166,21 +172,21 @@
           </div>
           <div class="context-item">
             <span class="context-label">DATA SOURCE</span>
-            <strong>Demo fixture</strong>
-            <span class="context-detail">No live source connected</span>
+            <strong id="data-source-value">Waiting for backend</strong>
+            <span class="context-detail" id="data-source-detail">Source is reported by the API</span>
           </div>
           <div class="context-item">
-            <span class="context-label">READING TIME</span>
-            <strong>Unavailable</strong>
-            <span class="context-detail">No measurement timestamp</span>
+            <span class="context-label">LAST OBSERVED</span>
+            <strong id="observed-time-value">Unavailable</strong>
+            <span class="context-detail" id="observed-time-detail">Select a measured station</span>
           </div>
           <div class="context-item context-coverage">
             <span class="context-label">DATA COVERAGE</span>
-            <strong>Not available</strong>
-            <span class="context-detail">No station coverage calculated</span>
+            <strong id="coverage-value">Not available</strong>
+            <span class="context-detail" id="coverage-detail">No coverage summary provided</span>
           </div>
         </section>
-        <p class="data-disclaimer" id="data-disclaimer">This preview uses illustrative demo values. It does not show current air-quality measurements.</p>
+        <p class="data-disclaimer" id="data-disclaimer">Waiting for backend observations. AQI remains uncalculated until the project agrees on a scale.</p>
       </section>
 
       <section class="trust-section" id="about" aria-labelledby="trust-title">
