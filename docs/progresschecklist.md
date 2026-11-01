@@ -12,9 +12,9 @@
 - [x] Phase 2 — Interactive map (implemented and reviewed in browser).
 - [x] Phase 3 — AQI dashboard (implemented and reviewed in browser).
 - [x] Phase 4 — Search and device location (Nominatim search and geolocation support implemented; browser-reviewed).
-- [ ] Phase 5 — Frontend API integration (wired to backend teammate's proposed contract; end-to-end connection review pending).
+- [ ] Phase 5 — Frontend API integration (routes/fields accepted by frontend and recorded; backend confirmation and connected UI review pending).
 
-At the initial audit, the workspace contained a zero-byte root `index.html`, a minimal `README.md`, and project documentation. Phases 1–4 were implemented and reviewed in a browser. Phase 5 wires the frontend to the backend teammate's proposed contract: `/api/health`, `/api/observations`, and `/api/predict`, using `http://192.168.160.226:8000` as its configured API origin. The backend teammate reports successful health/observations responses and CORS preflight for `http://localhost:5500`; this environment could not verify network reachability because outbound socket access is restricted here. AQI remains uncalculated pending a team-selected scale.
+At the initial audit, the workspace contained a zero-byte root `index.html`, a minimal `README.md`, and project documentation. Phases 1–4 were implemented and reviewed in a browser. Phase 5 wires the frontend to the backend contract accepted by the frontend and recorded in `docs/API_CONTRACT.md`: `/api/health`, `/api/observations`, and `/api/predict`, using `http://192.168.160.226:8000` as its configured API origin. From this frontend machine, health and observations each returned 200, the observations response was unavailable with an empty list, the CORS preflight for `http://localhost:5500` returned 200, and the local frontend page returned 200. Backend confirmation and browser review of the connected unavailable state remain open. AQI remains uncalculated by agreement until a scale is selected.
 
 ## Phase 1 — UI foundation
 
@@ -137,7 +137,7 @@ At the initial audit, the workspace contained a zero-byte root `index.html`, a m
 | 2. Interactive map | Complete | Browser preview confirmed OSM tiles, zoom control, demo marker popup, and visible attribution. |
 | 3. AQI dashboard | Complete | Browser review confirmed demo values, approximate map-centre location, demo-fixture source, unavailable timestamp, and unavailable coverage. |
 | 4. Search and device location | Complete | Nominatim search and map selection reviewed with a Delhi query. Device permission remains user-triggered and was not invoked during review. |
-| 5. Data source and backend contract | In progress | Frontend points to teammate's LAN backend; access could not be verified in this environment. Teammate reports observations are unavailable pending OpenAQ configuration; AQI scale remains undecided. |
+| 5. Data source and backend contract | In progress | Frontend accepts routes/fields and records them in `docs/API_CONTRACT.md`. Backend health, unavailable observations response, frontend page, and CORS preflight verified. Backend confirmation, browser UI review, and live source configuration remain open; AQI stays uncalculated until a scale is selected. |
 | 6. Spatial estimation and validation | Not started | |
 | 7. Integration and product quality | Not started | |
 | 8. Deployment | Not started | |
