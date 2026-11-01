@@ -1,0 +1,117 @@
+# AirSync Backend — Branch Checklist and Starter Prompt
+
+This document is the handoff for the person working on the `backend` branch on a separate machine. Work through one phase at a time, complete its exit check, and update this file as work is reviewed. The backend workspace has not been inspected in this audit, so its current implementation status must be confirmed by the backend developer.
+
+## Current status
+
+- **Branch:** `backend`
+- **Workspace status:** To be checked on the backend developer's machine.
+- **Current phase:** Phase 1 — Backend foundation
+- **Phase 1 status:** Not assessed; confirm repository contents before marking anything complete.
+
+## Phase 1 — Backend foundation and service contract
+
+**Status:** Not assessed
+
+- [ ] Inspect the backend branch and preserve existing work.
+- [ ] Confirm Python/FastAPI version and dependency management approach.
+- [ ] Create or confirm the FastAPI application entry point and local run instructions.
+- [ ] Add a health endpoint, proposed as `GET /api/health` (coordinate the final path).
+- [ ] Define and document an initial response contract for observation/prediction data with the frontend developer.
+- [ ] Add configuration through environment variables where needed; do not commit secrets.
+- [ ] Confirm CORS and same-origin expectations for local development and eventual deployment.
+
+**Exit check:** The service starts locally, health response works, and the frontend developer has an agreed API contract to build against.
+
+## Phase 2 — Data sources and ingestion
+
+**Status:** Not started
+
+- [ ] Confirm permitted and practical sources for Delhi air-quality observations (for example CPCB/DPCC or OpenAQ, subject to availability and terms).
+- [ ] Record source, station ID, coordinates, pollutant, unit, and observation timestamp for each reading.
+- [ ] Document refresh cadence, source limitations, and missing-data behavior.
+- [ ] Handle time zones and units consistently.
+- [ ] Add quality checks for duplicates, invalid coordinates, missing fields, outliers, and stale readings.
+- [ ] Keep fixture/sample data clearly separated and labelled from live observations.
+
+**Exit check:** Ingested records are traceable to a source and timestamp, and data quality/freshness behavior is documented.
+
+## Phase 3 — Read/query API
+
+**Status:** Not started; depends on Phase 1 contract and Phase 2 data availability.
+
+- [ ] Implement the agreed observation/station endpoint(s).
+- [ ] Validate query parameters and return clear client errors for invalid input.
+- [ ] Return consistent units, timestamps, source identifiers, and data status.
+- [ ] Define empty-result and upstream-failure behavior.
+- [ ] Add the agreed `/api/predict` route only when its semantics and response fields are defined.
+- [ ] Keep API docs/examples aligned with actual response models.
+
+**Exit check:** The frontend can consume the service using the documented contract for success, empty, and failure cases.
+
+## Phase 4 — Spatial baseline and evaluation
+
+**Status:** Not started; requires sufficient trusted observations.
+
+- [ ] Establish a transparent baseline such as inverse-distance weighting only if source coverage supports it.
+- [ ] Record model inputs, units, assumptions, and support/coverage limitations.
+- [ ] Validate using held-out locations, spatial block validation, or leave-one-station-out testing.
+- [ ] Report suitable metrics such as MAE, RMSE, and bias with evaluation context.
+- [ ] Do not invent accuracy, confidence, or safety claims.
+- [ ] Return an explicit measured-versus-estimated indicator and coverage/status with every result.
+
+**Exit check:** Any estimate exposed by the API has a documented method and evaluation; otherwise the API clearly returns unavailable/demo status.
+
+## Phase 5 — Frontend integration and deployment readiness
+
+**Status:** Not started
+
+- [ ] Coordinate route names, schemas, units, timestamps, and CORS behavior with the frontend developer.
+- [ ] Verify local frontend-to-backend integration.
+- [ ] Confirm one combined deployment architecture with the frontend developer.
+- [ ] Configure production routing/runtime for the actual app structure.
+- [ ] Review hosting limits against model size and inference time.
+- [ ] Verify deployed health and data routes and document required environment settings.
+
+**Exit check:** Backend and frontend work together on the agreed deployment structure, with data provenance intact.
+
+## Phase log
+
+| Phase | Status | Notes |
+|---|---|---|
+| 1. Backend foundation and service contract | Not assessed | Confirm backend branch contents first |
+| 2. Data sources and ingestion | Not started | |
+| 3. Read/query API | Not started | Depends on contract and data |
+| 4. Spatial baseline and evaluation | Not started | Depends on trusted observations |
+| 5. Frontend integration and deployment readiness | Not started | Coordinate with frontend developer |
+
+## Branch coordination rules
+
+- Do backend work and commits on `backend`; do not commit frontend implementation on this branch.
+- Keep the API contract documented and share changes with the frontend developer before changing field names or routes.
+- Include units, source, timestamp, and measured/estimated/demo status in responses where applicable.
+- Do not fabricate air-quality readings or report model performance before validation.
+- Agree final merged layout and deployment routing together; a branch existing remotely does not mean its work is integrated into the deployable app.
+
+## Backend starter prompt
+
+Copy the prompt below into the backend project workspace after checking out the `backend` branch:
+
+> You are working on the AirSync backend branch. Build the FastAPI backend for a hyperlocal air-quality mapping project initially focused on Delhi. The frontend is being developed separately on the `frontend` branch and must remain untouched by this backend task.
+>
+> First inspect the existing repository and preserve all existing work. Do not assume files, providers, data, or model results exist unless the repository confirms them. Work on one phase at a time, update `docs/BACKEND_PROGRESS_CHECKLIST.md`, and stop at the end of the current phase for review before beginning the next.
+>
+> Start with Phase 1 only: establish or confirm the FastAPI app entry point, dependency/run instructions, a health endpoint, environment-based configuration, and an initial API response contract. Coordinate the route names and JSON fields with the frontend developer before treating the contract as final. Proposed routes are `GET /api/health` and, later, `GET /api/predict`; treat these as proposals until agreed.
+>
+> Keep the backend organized and document how to run it locally. Use explicit request/response models and clear error handling. Never commit API keys or secrets. Do not change frontend files or claim the frontend/backend branches are integrated.
+>
+> Air-quality integrity requirements:
+> - Preserve source, station identifier, coordinates, pollutant, units, and timestamps for observations.
+> - Clearly distinguish measured observations, modelled estimates, and demo/fixture data in API responses.
+> - Do not fabricate real readings, confidence values, validation metrics, or claims that a location is safe.
+> - Add ingestion and quality checks only after confirming data source availability, access terms, and schema.
+> - Build spatial estimation only when sufficient trusted data exist; start with an explainable baseline and validate it using spatially appropriate held-out data before exposing accuracy claims.
+>
+> At the end of Phase 1, summarize files changed, how to run the service, the health response, the proposed API contract, and any decisions needed from the frontend developer. Leave later phases unchecked until they are implemented and reviewed.
+
+See [AirSync Project Plan](AirSync_Project_Plan.md) for the overall product scope and data integrity principles, and [Frontend Progress Checklist](FRONTEND_PROGRESS_CHECKLIST.md) for the frontend branch plan.
