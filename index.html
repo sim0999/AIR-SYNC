@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Explore local air quality around Delhi with AirSync. See what is measured and what is estimated."
+    />
+    <meta name="theme-color" content="#f4f6f1" />
+    <title>AirSync — Know your air</title>
+    <link rel="icon" href="assets/airsync-mark.svg" type="image/svg+xml" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script
+      defer
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="js/map.js" defer></script>
+    <script src="js/config.js" defer></script>
+    <script src="js/location.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#top" aria-label="AirSync home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 36 36" fill="none">
+              <path d="M7 21.5c2.5-5 5.2-7.5 8.1-7.5 3 0 4.8 2.7 7.2 2.7 2.2 0 4.4-1.4 6.7-4.2" />
+              <path d="M7 27.5c2.6-3.6 4.9-5.4 7.3-5.4 2.8 0 4.6 2.7 7.5 2.7 2.4 0 4.6-1 7.2-3" />
+            </svg>
+          </span>
+          <span>air<span class="brand-accent">sync</span></span>
+        </a>
+
+        <nav class="main-nav" aria-label="Main navigation">
+          <a class="nav-link active" href="#overview" aria-current="page">Overview</a>
+          <a class="nav-link" href="#explore">Explore map</a>
+          <a class="nav-link" href="#about">About</a>
+        </nav>
+
+        <a class="header-location" href="#location-search">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 8.4c0 4.3-6 9.1-6 9.1S4 12.7 4 8.4a6 6 0 1 1 12 0Z"/><circle cx="10" cy="8" r="2"/></svg>
+          <span id="header-location-label">Delhi, India</span>
+        </a>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy" id="overview">
+          <p class="eyebrow"><span class="eyebrow-line"></span> LOCAL AIR, MADE CLEAR</p>
+          <h1 id="hero-title">Breathe better.<br /><span>Know your air.</span></h1>
+          <p class="hero-description">
+            Air can change from one street to the next. Get a clearer picture of the air around you, and see where the information comes from.
+          </p>
+
+          <form class="search-form" id="location-search" role="search">
+            <label class="visually-hidden" for="location-input">Search a place or neighbourhood</label>
+            <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.2 4.2"/></svg>
+            <input id="location-input" name="location" type="search" placeholder="Search a place or neighbourhood" autocomplete="off" />
+            <button class="button button-primary" type="submit">Search <span aria-hidden="true">↗</span></button>
+          </form>
+          <p class="search-provider-note">
+            Place searches are sent to <a href="https://nominatim.openstreetmap.org/" target="_blank" rel="noopener noreferrer">OpenStreetMap Nominatim</a> only when you press Search. Results use OpenStreetMap contributors' data; avoid private or confidential details. <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank" rel="noopener noreferrer">Usage policy</a>
+          </p>
+          <button class="button button-location" id="use-location" type="button">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5v3M10 14.5v3M17.5 10h-3M5.5 10h-3"/><circle cx="10" cy="10" r="4.5"/><circle cx="10" cy="10" r="1" class="location-center"/></svg>
+            Use my location
+          </button>
+          <p class="form-message" id="search-message" role="status" aria-live="polite"></p>
+          <ul class="location-results" id="location-results" aria-label="Place search results" hidden></ul>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <div class="sun-disc"></div>
+          <div class="art-hill hill-back"></div>
+          <div class="art-hill hill-front"></div>
+          <div class="art-grain"></div>
+          <div class="art-label"><span class="art-label-dot"></span> A closer look at your air</div>
+          <svg class="art-leaf leaf-one" viewBox="0 0 100 150" fill="none"><path d="M50 144C46 95 53 49 74 9M51 103c-22-10-34-27-37-49 20 3 35 16 40 36M57 73c17-10 26-25 28-45-17 4-29 15-35 31M47 129c-16-6-26-17-31-34 16 2 29 10 37 24"/></svg>
+          <svg class="art-leaf leaf-two" viewBox="0 0 100 150" fill="none"><path d="M50 144C54 95 47 49 26 9M49 103c22-10 34-27 37-49-20 3-35 16-40 36M43 73C26 63 17 48 15 28c17 4 29 15 35 31M53 129c16-6 26-17 31-34-16 2-29 10-37 24"/></svg>
+        </div>
+      </section>
+
+      <section class="air-section" aria-labelledby="air-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> YOUR AREA</p>
+            <h2 id="air-title">A snapshot of the air</h2>
+          </div>
+          <span class="demo-badge"><span aria-hidden="true">ⓘ</span> DEMO DATA</span>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="aqi-card" aria-label="Demonstration air quality index">
+            <div class="aqi-card-top">
+              <span class="card-label">AIR QUALITY INDEX</span>
+              <span class="status-pill"><span class="status-dot"></span> Sample</span>
+            </div>
+            <div class="aqi-reading"><strong>87</strong><span class="aqi-category">Moderate</span></div>
+            <p class="aqi-note">Illustrative value only · not a live reading</p>
+            <div class="aqi-scale" aria-label="Illustrative AQI scale">
+              <span class="scale-segment scale-good"></span><span class="scale-segment scale-moderate"></span><span class="scale-segment scale-high"></span><span class="scale-segment scale-very-high"></span>
+              <span class="scale-marker" aria-hidden="true"></span>
+            </div>
+            <div class="scale-labels"><span>Good</span><span>Moderate</span><span>Poor</span><span>Very poor</span></div>
+          </article>
+
+          <article class="pollutant-card">
+            <div class="card-label">POLLUTANTS <span class="muted-label">· SAMPLE VALUES</span></div>
+            <div class="pollutant-row">
+              <div class="pollutant-icon pm25">2.5</div>
+              <div class="pollutant-name"><strong>PM2.5</strong><span>Fine particles</span></div>
+              <div class="pollutant-value">31 <small>µg/m³</small></div>
+            </div>
+            <div class="pollutant-divider"></div>
+            <div class="pollutant-row">
+              <div class="pollutant-icon pm10">10</div>
+              <div class="pollutant-name"><strong>PM10</strong><span>Coarse particles</span></div>
+              <div class="pollutant-value">54 <small>µg/m³</small></div>
+            </div>
+            <p class="pollutant-footnote">Sample values shown for layout preview</p>
+          </article>
+
+          <article class="map-card" id="explore" aria-labelledby="map-title">
+              <div class="map-card-heading">
+              <div><span class="card-label">INTERACTIVE MAP</span><h3 id="map-title">Delhi air quality map</h3></div>
+              <span class="map-placeholder-tag">DEMO OVERLAYS</span>
+            </div>
+            <div id="air-map" class="leaflet-map" role="application" aria-label="Interactive map centred on Delhi. Use arrow keys to pan and plus or minus keys to zoom."></div>
+            <div class="map-legend" aria-label="Map legend">
+              <span class="map-legend-item" id="demo-station-legend"><i class="legend-station" aria-hidden="true"></i> Demo station marker</span>
+              <span class="map-legend-item" id="estimate-area-legend"><i class="legend-estimate" aria-hidden="true"></i> Illustrative estimate area</span>
+              <span class="map-legend-item" id="device-location-legend" hidden><i class="legend-device" aria-hidden="true"></i> <span id="selected-location-legend-label">Selected location</span></span>
+              <span class="map-legend-note" id="map-legend-note">No live readings or validated estimates</span>
+            </div>
+          </article>
+        </div>
+        <section class="dashboard-context" aria-label="Location and sample data details">
+          <div class="context-item">
+            <span class="context-label">CURRENT VIEW</span>
+            <strong id="current-location-value">Delhi, India</strong>
+            <span class="context-detail" id="current-location-detail">Default map view</span>
+          </div>
+          <div class="context-item">
+            <span class="context-label">MAP CENTRE</span>
+            <strong id="location-latitude">28.6139° N</strong>
+            <span class="context-detail" id="location-longitude">77.2090° E · approximate</span>
+          </div>
+          <div class="context-item">
+            <span class="context-label">DATA SOURCE</span>
+            <strong>Demo fixture</strong>
+            <span class="context-detail">No live source connected</span>
+          </div>
+          <div class="context-item">
+            <span class="context-label">READING TIME</span>
+            <strong>Unavailable</strong>
+            <span class="context-detail">No measurement timestamp</span>
+          </div>
+          <div class="context-item context-coverage">
+            <span class="context-label">DATA COVERAGE</span>
+            <strong>Not available</strong>
+            <span class="context-detail">No station coverage calculated</span>
+          </div>
+        </section>
+        <p class="data-disclaimer" id="data-disclaimer">This preview uses illustrative demo values. It does not show current air-quality measurements.</p>
+      </section>
+
+      <section class="trust-section" id="about" aria-labelledby="trust-title">
+        <div class="trust-heading">
+          <p class="eyebrow"><span class="eyebrow-line"></span> CLEAR ABOUT WHAT WE KNOW</p>
+          <h2 id="trust-title">Measured here.<br /><span>Estimated there.</span></h2>
+        </div>
+        <p class="trust-copy">AirSync is being built to make local air quality easier to understand. Monitoring stations provide readings at specific places. Any estimate between stations is different—and should be shown with its limits, source, and freshness.</p>
+        <div class="trust-legend" aria-label="Information types">
+          <span><i class="legend-dot measured-dot"></i> Measured at a station</span>
+          <span><i class="legend-dot estimated-dot"></i> Modelled estimate</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a class="brand footer-brand" href="#top" aria-label="AirSync home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none"><path d="M7 21.5c2.5-5 5.2-7.5 8.1-7.5 3 0 4.8 2.7 7.2 2.7 2.2 0 4.4-1.4 6.7-4.2"/><path d="M7 27.5c2.6-3.6 4.9-5.4 7.3-5.4 2.8 0 4.6 2.7 7.5 2.7 2.4 0 4.6-1 7.2-3"/></svg></span>
+        <span>air<span class="brand-accent">sync</span></span>
+      </a>
+      <p>Local air, made clearer. <span>Built for a breath of perspective.</span></p>
+      <a class="back-to-top" href="#top">Back to top ↑</a>
+    </footer>
+  </body>
+</html>

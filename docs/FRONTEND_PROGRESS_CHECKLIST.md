@@ -6,57 +6,62 @@ This document is for the person working on the `frontend` branch in the frontend
 
 - **Branch:** `frontend`
 - **Workspace reviewed:** `C:\Users\ry105\OneDrive\Desktop\New folder\AIR-SYNC`
-- **Current phase:** Phase 1 — UI foundation
-- **Phase 1 status:** Not started
-- **Audit finding:** The workspace has an empty root `index.html`, a minimal `README.md`, and project documentation. No frontend CSS or JavaScript implementation is present yet.
+- **Current phase:** Phase 5 — Backend API integration (next; contract needed)
+- **Phase 1 status:** Complete
+- **Audit finding:** The workspace initially had no frontend implementation. Phase 1 now has a root page with separate CSS and JavaScript files.
 
 ## Phase 1 — UI foundation
 
-**Status:** Not started
+**Status:** Complete
 
-- [ ] Create the semantic page structure and AirSync branding/navigation.
-- [ ] Add the “Breathe Better. Know Your Air.” hero and concise project description.
-- [ ] Add location search, Search, and Use My Location controls.
-- [ ] Add an AQI summary and map container.
-- [ ] Explain measured observations versus modelled estimates; include the footer.
-- [ ] Keep HTML, CSS, and JavaScript separate; use accessible labels and unique IDs.
-- [ ] Label all sample values as demo data; do not imply measurements are live.
-- [ ] Preview and review this phase before moving on.
+- [x] Create the semantic page structure and AirSync branding/navigation.
+- [x] Add the “Breathe Better. Know Your Air.” hero and concise project description.
+- [x] Add location search, Search, and Use My Location controls.
+- [x] Add an AQI summary and map container.
+- [x] Explain measured observations versus modelled estimates; include the footer.
+- [x] Keep HTML, CSS, and JavaScript separate; use accessible labels and unique IDs.
+- [x] Label all sample values as demo data; do not imply measurements are live.
+- [x] Preview and review this phase before moving on.
 
 **Exit check:** All page sections exist, assets/scripts load, and demo content is clearly identified.
 
 ## Phase 2 — Interactive map
 
-**Status:** Not started
+**Status:** Complete
 
-- [ ] Integrate Leaflet with OpenStreetMap and centre the map on Delhi.
-- [ ] Add pan/zoom controls and a readable legend.
-- [ ] Add clearly labelled demo station markers and an estimated-area treatment.
-- [ ] Visually distinguish observed, estimated, and demo information.
-- [ ] Keep map behavior in a dedicated module.
-- [ ] Review map behavior before moving on.
+- [x] Integrate Leaflet with OpenStreetMap and centre the map on Delhi.
+- [x] Add pan/zoom controls and a readable legend.
+- [x] Add clearly labelled demo station markers and an estimated-area treatment.
+- [x] Visually distinguish observed, estimated, and demo information.
+- [x] Keep map behavior in a dedicated module.
+- [x] Review map behavior before moving on.
 
 **Exit check:** The map works and the legend makes each data type clear.
 
 ## Phase 3 — AQI dashboard
 
-**Status:** Not started
+**Status:** Complete
 
-- [ ] Show AQI/category, PM2.5, and PM10.
-- [ ] Show selected location and coordinates where useful.
-- [ ] Show source, timestamp, and status/coverage when available.
-- [ ] Label demo values and avoid invented accuracy/confidence claims.
+- [x] Show AQI/category, PM2.5, and PM10.
+- [x] Show the default Delhi view and approximate map-centre coordinates.
+- [x] Show source, timestamp, and status/coverage when available; identify unavailable values honestly.
+- [x] Label demo values and avoid invented accuracy/confidence claims.
 
 **Exit check:** Every displayed value has an honest status and provenance or is explicitly demo content.
 
 ## Phase 4 — Search and device location
 
-**Status:** Not started
+**Status:** Complete — OpenStreetMap Nominatim selected by the project owner.
 
-- [ ] Integrate a geocoding provider only after it is selected/configured by the team.
-- [ ] Add browser geolocation to Use My Location.
-- [ ] Show permission, loading, success, no-result, and error states.
-- [ ] Keep selected location and map in sync.
+- [x] Integrate OpenStreetMap Nominatim for user-submitted searches; do not add autocomplete.
+- [x] Add browser geolocation to Use My Location; request permission only after the user clicks.
+- [x] Show geolocation permission, loading, success, timeout, and error feedback, plus geocoder loading, results, no-result, and service-error states.
+- [x] Keep selected place/device location and map/dashboard context in sync; hide Delhi-only demo overlays when showing another location.
+- [x] Keep location behavior in dedicated `location.js` and `map.js` modules.
+- [x] Disclose that submitted place searches go to Nominatim; warn users not to enter private or confidential details.
+- [x] Limit requests to one per 1.1 seconds per page and cache repeated queries in memory.
+
+**Deployment note:** Per-page throttling does not enforce a limit across all visitors. Before public deployment or increased traffic, route searches through a backend proxy with shared caching/rate limiting or switch to a provider suited to the app's usage. Nominatim autocomplete is prohibited.
 
 **Exit check:** Search and device location handle expected states without hardcoded secrets or fabricated results.
 
@@ -88,11 +93,11 @@ This document is for the person working on the `frontend` branch in the frontend
 
 | Phase | Status | Notes |
 |---|---|---|
-| 1. UI foundation | Not started | Current phase |
-| 2. Interactive map | Not started | |
-| 3. AQI dashboard | Not started | |
-| 4. Search and device location | Not started | |
-| 5. Backend API integration | Blocked on contract | Agree JSON fields/routes with backend developer |
+| 1. UI foundation | Complete | Browser preview reviewed at mobile width; demo labels and placeholder control feedback confirmed |
+| 2. Interactive map | Complete | OSM tiles loaded; zoom controls and a demo marker popup reviewed in browser; attribution visible |
+| 3. AQI dashboard | Complete | Browser review confirmed demo values, approximate map-centre location, demo-fixture source, unavailable timestamp, and unavailable coverage |
+| 4. Search and device location | Complete | Nominatim place search and map selection reviewed with a Delhi query; device permission path remains user-triggered and was not invoked during review. |
+| 5. Backend API integration | Blocked on contract | Next phase; agree JSON fields/routes with backend developer |
 | 6. Accessibility and integration readiness | Not started | |
 
 ## Branch coordination rules
