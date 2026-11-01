@@ -12,9 +12,9 @@
 - [x] Phase 2 — Interactive map (implemented and reviewed in browser).
 - [x] Phase 3 — AQI dashboard (implemented and reviewed in browser).
 - [x] Phase 4 — Search and device location (Nominatim search and geolocation support implemented; browser-reviewed).
-- [ ] Phase 5 — Data source and backend contract (blocked; backend branch has no API implementation or contract yet).
+- [ ] Phase 5 — Frontend API integration (wired to backend teammate's proposed contract; end-to-end connection review pending).
 
-At the initial audit, the workspace contained a zero-byte root `index.html`, a minimal `README.md`, and project documentation. Phase 1 added the page foundation in `index.html`, `css/style.css`, and `js/app.js`, reviewed in a browser at mobile width. Phase 2 added an interactive Leaflet/OpenStreetMap map in `js/map.js`, with explicitly illustrative overlays, and was reviewed in a browser. Phase 3 added location and data-provenance details to the dashboard and was reviewed in a browser. Phase 4 added user-submitted OpenStreetMap Nominatim searches and browser geolocation with synchronized map/dashboard updates; place search was browser-reviewed with a Delhi query. No backend source, data pipeline, or deployment configuration is present in this frontend workspace. The project plan is a specification, not evidence those features exist. Git is on `frontend`; remote refs for `main`, `frontend`, and `backend` are present, but the backend branch contents were not examined as part of this workspace audit.
+At the initial audit, the workspace contained a zero-byte root `index.html`, a minimal `README.md`, and project documentation. Phases 1–4 were implemented and reviewed in a browser. Phase 5 now wires the frontend to the backend teammate's proposed contract: `/api/health`, `/api/observations`, and `/api/predict`. The health check at the proposed local URL `127.0.0.1:8000` could not connect from this machine, so live end-to-end review remains open. Separate-machine development needs a reachable backend address and suitable CORS or proxy configuration. AQI remains uncalculated pending a team-selected scale.
 
 ## Phase 1 — UI foundation
 
@@ -73,15 +73,16 @@ At the initial audit, the workspace contained a zero-byte root `index.html`, a m
 
 ## Phase 5 — Data source and backend contract
 
-**Status:** Blocked — inspected `origin/backend`; only README and project documentation are present.  
+**Status:** In progress — frontend wired to the proposed contract; successful live backend review and shared contract sign-off remain open.
 **Goal:** Establish trustworthy inputs and a real API contract before presenting live data.
 
 - [ ] Confirm data providers, permissions, fields, units, timestamp conventions, and refresh expectations with the project team.
-- [ ] Define the FastAPI response contract for health and prediction/observation data.
+- [x] Record and wire the backend teammate's proposed health, observation, and prediction contract; finalize/sign off jointly.
 - [ ] Implement backend ingestion and quality checks for source, station, coordinates, pollutant, units, and timestamp.
 - [ ] Document missing values, duplicates, outliers, and freshness behavior.
-- [ ] Add a frontend API module using relative paths such as `/api/predict`.
-- [ ] Handle loading, success, empty, and failure responses without fabricating measurements.
+- [x] Add a frontend API module for health, observations, and predictions; use relative paths by default and allow a configured API origin.
+- [x] Handle loading, unavailable, empty, and failure responses without fabricating measurements.
+- [ ] Verify successful integration against a reachable backend and confirm CORS/routing.
 - [ ] Before public deployment or increased traffic, proxy public Nominatim searches through a backend with shared caching/rate limiting, or select a provider suited to app-wide usage.
 
 **Exit check:** Frontend and backend agree on a documented contract, and displayed live values retain their source and timestamp.
@@ -136,7 +137,7 @@ At the initial audit, the workspace contained a zero-byte root `index.html`, a m
 | 2. Interactive map | Complete | Browser preview confirmed OSM tiles, zoom control, demo marker popup, and visible attribution. |
 | 3. AQI dashboard | Complete | Browser review confirmed demo values, approximate map-centre location, demo-fixture source, unavailable timestamp, and unavailable coverage. |
 | 4. Search and device location | Complete | Nominatim search and map selection reviewed with a Delhi query. Device permission remains user-triggered and was not invoked during review. |
-| 5. Data source and backend contract | Blocked | Backend branch has no FastAPI implementation or API contract; frontend integration must wait for agreed routes and response schema. |
+| 5. Data source and backend contract | In progress | Frontend integration follows teammate's proposal; backend is unreachable at `127.0.0.1:8000` from this machine, and AQI scale remains undecided. |
 | 6. Spatial estimation and validation | Not started | |
 | 7. Integration and product quality | Not started | |
 | 8. Deployment | Not started | |

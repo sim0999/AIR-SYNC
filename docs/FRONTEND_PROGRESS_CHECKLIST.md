@@ -6,7 +6,7 @@ This document is for the person working on the `frontend` branch in the frontend
 
 - **Branch:** `frontend`
 - **Workspace reviewed:** `C:\Users\ry105\OneDrive\Desktop\New folder\AIR-SYNC`
-- **Current phase:** Phase 5 — Backend API integration (blocked on backend contract)
+- **Current phase:** Phase 5 — Backend API integration (implemented; live backend review pending)
 - **Phase 1 status:** Complete
 - **Audit finding:** The workspace initially had no frontend implementation. Phase 1 now has a root page with separate CSS and JavaScript files.
 
@@ -67,13 +67,15 @@ This document is for the person working on the `frontend` branch in the frontend
 
 ## Phase 5 — Backend API integration
 
-**Status:** Blocked — checked `origin/backend`; it currently contains only `README.md` and project documentation, with no FastAPI implementation or API contract.
+**Status:** In progress — frontend wired to the backend developer's proposed contract; backend is not reachable from this machine at `127.0.0.1:8000`.
 
-- [ ] Agree the JSON response shape and route names with the backend developer before wiring the UI.
-- [ ] Add a dedicated API module and use same-origin/relative routes such as `/api/health` and `/api/predict` if agreed.
-- [ ] Handle loading, success, empty, and error responses.
-- [ ] Map response fields to the dashboard without inventing missing measurements.
-- [ ] Document any backend contract mismatch for coordination.
+- [x] Record the backend developer's proposed route names, response shape, status semantics, and source units below.
+- [x] Add a dedicated API module for `/api/health`, `/api/observations?max_locations=3`, and `/api/predict`.
+- [x] Handle loading, unavailable, empty, malformed, timeout, and network-error responses.
+- [x] Map measured observations to station markers and dashboard fields without inventing measurements.
+- [x] Keep AQI uncalculated because the project has not selected a scale; only display estimates explicitly marked `estimated` and carrying a unit.
+- [ ] Confirm a successful end-to-end response from a running, reachable backend and review the connected UI.
+- [ ] Finalize the proposal as a shared contract in the backend documentation.
 
 **Exit check:** Frontend uses the agreed contract and preserves source, timestamp, units, and measured/estimated status.
 
@@ -97,7 +99,7 @@ This document is for the person working on the `frontend` branch in the frontend
 | 2. Interactive map | Complete | OSM tiles loaded; zoom controls and a demo marker popup reviewed in browser; attribution visible |
 | 3. AQI dashboard | Complete | Browser review confirmed demo values, approximate map-centre location, demo-fixture source, unavailable timestamp, and unavailable coverage |
 | 4. Search and device location | Complete | Nominatim place search and map selection reviewed with a Delhi query; device permission path remains user-triggered and was not invoked during review. |
-| 5. Backend API integration | Blocked | Backend branch currently has no API implementation/contract; agree routes and JSON fields with backend developer |
+| 5. Backend API integration | In progress | Frontend wiring follows the teammate-provided proposal. Local backend at `127.0.0.1:8000` is not running/reachable here; successful connected review remains open. |
 | 6. Accessibility and integration readiness | Not started | |
 
 ## Branch coordination rules
@@ -114,18 +116,18 @@ These are decisions for both developers; the frontend should not guess them and 
 
 | Decision | Agreed value |
 |---|---|
-| Health route and response | Pending |
-| Observation route and response | Pending |
-| Prediction route and response | Pending |
-| AQI scale/category definition | Pending |
-| Pollutant names and units | Pending |
-| Timestamp format and timezone | Pending |
-| Status values (measured / estimated / demo / unavailable) | Pending |
-| Source and station fields | Pending |
-| Empty result and error response | Pending |
-| Local and deployed origin/routing | Pending |
+| Health route and response | Proposed: `GET /api/health`; JSON body not specified |
+| Observation route and response | Proposed: `GET /api/observations?max_locations=3`; limit 1–5; collection has `status`, `source`, `observations`, `message` |
+| Prediction route and response | Proposed: `GET /api/predict?latitude=…&longitude=…&pollutant=…`; currently unavailable with null prediction |
+| AQI scale/category definition | Not selected; frontend does not calculate AQI |
+| Pollutant names and units | Provider-defined source names/units; backend does not convert; prediction must include a unit before display |
+| Timestamp format and timezone | UTC ISO 8601 |
+| Status values (measured / estimated / demo / unavailable) | Source readings use `measured`; prediction only `estimated` after validated model; currently `unavailable`; demo overlays are frontend-only |
+| Source and station fields | Observation: `status`, `pollutant`, `value`, `unit`, `observed_at`, `source`, `provider`, `station`, `attribution`, `coverage`; station: `id`, `name`, `latitude`, `longitude`, `sensor_id` |
+| Empty result and error response | Observation collection may be unavailable and includes `message`; standard HTTP/error JSON shape still to confirm |
+| Local and deployed origin/routing | Proposed local backend `http://127.0.0.1:8000`; configurable `AIRSYNC_CONFIG.apiBaseUrl`, empty for same-origin; separate machine requires reachable host and CORS/proxy setup |
 
-Record the final agreement here and in the backend's API docs before wiring frontend API calls.
+This table records the backend developer's proposal, not final joint sign-off. Confirm it in backend documentation before treating the contract as final.
 
 See [AirSync Project Plan](AirSync_Project_Plan.md) for product scope and data-integrity principles, and [Backend Progress Checklist](BACKEND_PROGRESS_CHECKLIST.md) for the other branch's work plan and starter prompt.
 
