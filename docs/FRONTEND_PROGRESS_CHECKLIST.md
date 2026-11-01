@@ -62,10 +62,10 @@ This document is for the person working on the `frontend` branch in the frontend
 
 ## Phase 5 — Backend API integration
 
-**Status:** Not started; depends on the backend response contract being agreed.
+**Status:** In progress; frontend developer reports that the UI is wired to the backend route names. Backend v1 payload and error/empty behavior are now documented; browser-level verification remains open and AQI is intentionally uncalculated.
 
-- [ ] Agree the JSON response shape and route names with the backend developer before wiring the UI.
-- [ ] Add a dedicated API module and use same-origin/relative routes such as `/api/health` and `/api/predict` if agreed.
+- [x] Establish the backend v1 JSON response shape and route names in [Backend API Contract v1](BACKEND_API_CONTRACT.md); frontend developer reports wiring the route names.
+- [ ] Verify the dedicated API module uses the v1 paths and configurable base URL in the frontend workspace.
 - [ ] Handle loading, success, empty, and error responses.
 - [ ] Map response fields to the dashboard without inventing missing measurements.
 - [ ] Document any backend contract mismatch for coordination.
@@ -92,35 +92,35 @@ This document is for the person working on the `frontend` branch in the frontend
 | 2. Interactive map | Not started | |
 | 3. AQI dashboard | Not started | |
 | 4. Search and device location | Not started | |
-| 5. Backend API integration | Blocked on contract | Agree JSON fields/routes with backend developer |
+| 5. Backend API integration | In progress | Backend v1 route, field, unit, timestamp, status, empty/error, and CORS behavior are documented in `BACKEND_API_CONTRACT.md`; route wiring is reported by frontend developer; browser-level connection and UI field mapping remain to verify. AQI is omitted pending scale selection. |
 | 6. Accessibility and integration readiness | Not started | |
 
 ## Branch coordination rules
 
 - Do frontend work and commits on `frontend`; do not commit backend implementation on this branch.
 - Keep UI structure and styling independent of backend internals.
-- Agree API paths, field names, units, timestamps, and status labels with the backend developer before integration.
+- Use the documented backend v1 routes and field semantics; coordinate any requested contract changes before relying on them.
 - Use demo fixtures only when clearly labelled; never present them as real air-quality observations.
 - Merge branches only when both sides are ready and the integration structure has been agreed.
 
-## Shared API agreement (fill in together before Phase 5)
+## Shared API contract v1 (frontend review during integration)
 
-The table below is the backend's concrete v1 proposal for frontend review. It is not marked as agreed until the frontend developer confirms or edits it; the frontend should not silently assume a final contract from a proposal.
+The table below records the backend v1 contract for the routes the frontend developer reports wiring. The frontend workspace is separate and was not available for direct browser review here; confirm behavior during integration and record any needed changes before treating the full connection as verified.
 
-| Decision | Backend proposal / current status |
+| Decision | Backend v1 contract |
 |---|---|
-| Health route and response | Proposal: `GET /api/health` → `{"status":"ok","service":"airsync-api"}` |
-| Observation route and response | Proposal: `GET /api/observations?max_locations=3` (1–5); response has `status`, `source`, `observations`, and `message`; unavailable returns an empty list |
-| Prediction route and response | Proposal: `GET /api/predict?latitude=…&longitude=…&pollutant=…`; returns `status: unavailable`, `prediction: null` until a model is validated |
-| AQI scale/category definition | Pending; no AQI scale or category conversion is implemented |
-| Pollutant names and units | Use provider's pollutant names and units; preserve units without conversion |
+| Health route and response | V1: `GET /api/health` → `{"status":"ok","service":"airsync-api"}` |
+| Observation route and response | V1: `GET /api/observations?max_locations=3` (1–5); envelope has `status`, `source`, `observations`, `message`; unavailable returns an empty list |
+| Prediction route and response | V1: `GET /api/predict?latitude=…&longitude=…&pollutant=…`; returns `status: unavailable`, `prediction: null` until a model is validated |
+| AQI scale/category definition | Not returned or calculated in v1; add only after the project selects and documents a scale |
+| Pollutant names and units | Provider's names/units passed through unchanged |
 | Timestamp format and timezone | Timezone-aware UTC ISO 8601 |
-| Status values (measured / estimated / demo / unavailable) | Observation responses: `measured` or `unavailable`; prediction may be `estimated` only after validation; no demo records are served |
-| Source and station fields | Source/provider, station and sensor IDs, coordinates, pollutant, unit, timestamp, coverage and attribution where provided |
-| Empty result and error response | Empty results use `status: unavailable`; errors use `{error:{code,message,field_errors?}}`; 422 invalid request, 502 upstream failure, 503 credential/rate-limit issue, 500 unexpected error |
-| Local and deployed origin/routing | Same-origin in production; local exact origins may be set with `AIRSYNC_CORS_ORIGINS`; Vercel backend config is present, combined frontend app is not |
+| Status values (measured / estimated / demo / unavailable) | Observations contain measured records or an unavailable empty state; prediction is unavailable until validation; no demo records are served |
+| Source and station fields | Source/provider, station and sensor IDs, coordinates, pollutant, unit, timestamp, coverage and attribution where available |
+| Empty result and error response | Empty: HTTP 200 and `status: unavailable`; errors: `{error:{code,message,field_errors?}}`; 422 invalid request, 502 upstream, 503 credentials/rate limit, 500 unexpected |
+| Local and deployed origin/routing | Same-origin in production; exact local origins configured using `AIRSYNC_CORS_ORIGINS`; combined deployment not configured |
 
-Record the final agreement here and in the backend's API docs before wiring frontend API calls.
+Full field mapping and examples are in [Backend API Contract v1](BACKEND_API_CONTRACT.md). The frontend developer should verify the actual browser connection and flag any mismatch found.
 
 See [AirSync Project Plan](AirSync_Project_Plan.md) for product scope and data-integrity principles, and [Backend Progress Checklist](BACKEND_PROGRESS_CHECKLIST.md) for the other branch's work plan and starter prompt.
 

@@ -53,7 +53,7 @@ The backend entry point is prepared for Vercel's FastAPI runtime. The combined a
 
 ## API contract status
 
-The health route, `/api/observations`, and `/api/predict` are implemented. The prediction route returns an explicit unavailable state until a model is validated. The API envelope remains a proposal until the frontend and backend agree on fields, units, timestamps, status values, empty results, and errors. See [the proposed contract](docs/BACKEND_API_CONTRACT.md).
+The health route, `/api/observations`, and `/api/predict` are implemented. The backend v1 contract defines their fields, units, timestamps, status values, empty results, and errors; the frontend developer reports wiring the routes, and browser integration remains to be checked from the frontend workspace. The prediction route returns an explicit unavailable state until a model is validated. AQI is not calculated. See [the API contract v1](docs/BACKEND_API_CONTRACT.md).
 
 Live OpenAQ reads are disabled by default. Enable them only after reviewing OpenAQ's terms and each underlying provider's attribution/license, then set `AIRSYNC_ENABLE_OPENAQ=true` and `OPENAQ_API_KEY` in the runtime environment. Each observations request makes bounded upstream calls, has no cache, and should not be polled continuously.
 

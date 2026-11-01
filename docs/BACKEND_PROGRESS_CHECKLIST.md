@@ -7,7 +7,7 @@ This document tracks implementation on the `backend` branch. Work through phases
 - **Branch:** `backend`
 - **Workspace status:** Inspected in the current checkout; backend foundation added.
 - **Current phase:** Phase 1 — Backend foundation and service contract
-- **Phase 1 status:** In progress; backend v1 routes are implemented and the frontend developer reports wiring them. Agreement on remaining contract details and cross-computer browser review are pending.
+- **Phase 1 status:** Backend v1 contract is finalized for integration; frontend reports route wiring. Cross-computer browser review remains pending.
 
 ## Phase 1 — Backend foundation and service contract
 
@@ -17,7 +17,8 @@ This document tracks implementation on the `backend` branch. Work through phases
 - [x] Select Python dependency management with `requirements.txt`; Python 3.12 is available in this workspace.
 - [x] Create the FastAPI application entry point and local run instructions.
 - [x] Add and locally verify the proposed `GET /api/health` endpoint (HTTP 200).
-- [ ] Review and agree the proposed observation/prediction contract with the frontend developer.
+- [x] Freeze and document backend v1 health, observation, prediction, empty/error, status, unit, timestamp, and CORS behavior for the frontend routes it reports wiring.
+- [ ] Verify frontend field mapping and the end-to-end browser connection in the separate frontend workspace.
 - [x] Read the optional `OPENAQ_API_KEY` from the environment; no key is stored in the repository. Remaining provider settings are passed as explicit adapter arguments.
 - [x] Default to same-origin; configure optional exact local CORS origins with `AIRSYNC_CORS_ORIGINS`. Final deployment agreement remains pending because frontend files are not present.
 
@@ -25,7 +26,7 @@ This document tracks implementation on the `backend` branch. Work through phases
 
 ## Phase 2 — Data sources and ingestion
 
-**Status:** Prepared but gated; the OpenAQ adapter/one-shot CLI are draft implementation and must not be enabled until Phase 1's shared contract and the source authorization/license review are complete.
+**Status:** Adapter and one-shot CLI are implemented but gated; do not enable OpenAQ until source authorization and provider/license review are complete.
 
 - [ ] Confirm OpenAQ as the project source, provide an authorized API key, and review the returned underlying provider/license terms.
 - [x] Preserve source, provider, station/sensor IDs, coordinates, pollutant, units, timestamp, and available attribution in normalized records.
@@ -39,7 +40,7 @@ This document tracks implementation on the `backend` branch. Work through phases
 
 ## Phase 3 — Read/query API
 
-**Status:** Implemented behind an explicit source opt-in; shared contract approval and live-source credentials remain pending.
+**Status:** Implemented behind an explicit source opt-in; backend v1 contract is documented, while frontend browser review and live-source credentials remain pending.
 
 - [ ] Implement the agreed observation/station endpoint(s).
 - [x] Validate `max_locations` and return a structured 422 error for invalid input.
@@ -67,9 +68,10 @@ This document tracks implementation on the `backend` branch. Work through phases
 
 ## Phase 5 — Frontend integration and deployment readiness
 
-**Status:** Backend deployment preparation documented; frontend developer reports wiring the proposed routes in the separate frontend workspace. Cross-computer browser verification and remaining contract decisions are still pending.
+**Status:** Backend v1 contract documented and aligned to the routes the frontend developer reports wiring. AQI remains uncalculated. Cross-computer browser verification and confirmation of the UI field mapping remain pending.
 
-- [ ] Coordinate route names, schemas, units, timestamps, and CORS behavior with the frontend developer.
+- [x] Define the backend v1 route, schema, unit, timestamp, status, empty/error, and CORS contract for the routes the frontend developer reports wiring.
+- [ ] Verify frontend field mapping and CORS from the frontend browser/workspace.
 - [ ] Verify local frontend-to-backend integration.
 - [ ] Confirm one combined deployment architecture with the frontend developer.
 - [x] Prepare Vercel Python runtime configuration for the backend entry point; final combined frontend routing remains pending.
@@ -82,9 +84,9 @@ This document tracks implementation on the `backend` branch. Work through phases
 
 | Phase | Status | Notes |
 |---|---|---|
-| 1. Backend foundation and service contract | In progress | Added `api/index.py`, `requirements.txt`, local instructions, and a draft contract. FastAPI 0.162.0/Uvicorn 0.54.0 returned HTTP 200 on the LAN address; the frontend developer reports wiring the proposed routes. Agreement on remaining response details remains outstanding. |
-| 2. Data sources and ingestion | Prepared (gated on Phase 1) | Draft OpenAQ v3 adapter and one-shot CLI added with bounded Delhi lookup, field validation, UTC normalization, duplicate rejection, coverage metadata, attribution retention, and rejection counts by reason. Quality/freshness behavior documented. Requires shared contract, authorized key, and provider/license review; no scheduled ingestion or persistence. |
-| 3. Read/query API | Implemented (source opt-in) | Added typed `/api/observations` and `/api/predict`, with schema checks preventing inconsistent measured/unavailable/estimated envelopes. Observations default unavailable; opt-in OpenAQ reads are bounded to five stations/one location page. Prediction always returns unavailable until a validated model is connected. Errors use structured 422, 500, 502, and 503 responses. Health, unavailable, and invalid-query responses verified; live fetch remains unverified because no key is configured. Contract still needs frontend agreement. |
+| 1. Backend foundation and service contract | Contract v1 defined; browser check pending | Added `api/index.py`, `requirements.txt`, local instructions, and the v1 contract. FastAPI returned HTTP 200 on the LAN address; the frontend developer reports wiring the routes. |
+| 2. Data sources and ingestion | Prepared (source review pending) | OpenAQ v3 adapter and one-shot CLI added with bounded Delhi lookup, field validation, UTC normalization, duplicate rejection, coverage metadata, attribution retention, and rejection counts by reason. Quality/freshness behavior documented. Requires an authorized key and provider/license review; no scheduled ingestion or persistence. |
+| 3. Read/query API | Implemented (source opt-in) | Added typed `/api/observations` and `/api/predict`, with schema checks preventing inconsistent measured/unavailable/estimated envelopes. Observations default unavailable; opt-in OpenAQ reads are bounded to five stations/one location page. Prediction always returns unavailable until a validated model is connected. Errors use structured 422, 500, 502, and 503 responses. Health, unavailable, and invalid-query responses verified; live fetch remains unverified because no key is configured. Backend v1 contract is documented; frontend browser review remains pending. |
 | 4. Spatial baseline and evaluation | Prepared (unevaluated) | Added guarded IDW, a snapshot-based leave-one-station-out CLI, and MAE/RMSE/bias reporting by pollutant/unit. No trusted readings exist in the workspace, so no evaluation metrics are reported and no estimate route is exposed. |
 | 5. Frontend integration and deployment readiness | Prepared (browser review pending) | Added `.python-version`, Vercel FastAPI deployment notes, and a 30-second function bound for the limited upstream call path. Frontend route wiring is reported by its developer but the files are in a separate workspace; LAN health, empty observations, 422 validation, and localhost:5500 CORS preflight were checked from this backend computer. No remote browser check or deployment was performed. |
 
@@ -96,21 +98,21 @@ This document tracks implementation on the `backend` branch. Work through phases
 - Do not fabricate air-quality readings or report model performance before validation.
 - Agree final merged layout and deployment routing together; a branch existing remotely does not mean its work is integrated into the deployable app.
 
-## Shared API agreement (fill in together before Phase 3)
+## Backend/frontend API contract v1
 
-Do not treat these proposed route names or data definitions as final until both developers agree. Record the final contract here and in the frontend checklist.
+The backend v1 contract is frozen in [Backend API Contract](BACKEND_API_CONTRACT.md) for the routes the frontend developer reports wiring. AQI is omitted, and provider pollutant values/units pass through unchanged. The frontend browser review remains open because its source workspace is not available in this checkout.
 
-| Decision | Backend proposal / current status |
+| Decision | Backend v1 |
 |---|---|
 | Health route and response | `GET /api/health` → `{"status":"ok","service":"airsync-api"}` |
-| Observation route and response | `GET /api/observations?max_locations=3` (1–5); status/source/observations/message envelope; frontend agreement pending |
-| Prediction route and response | Backend v1 proposal: `/api/predict` returns unavailable until model validation; frontend agreement pending |
-| AQI scale/category definition | Pending |
-| Pollutant names and units | Provider names/units preserved; AQI mapping pending |
-| Timestamp format and timezone | Timezone-aware UTC ISO 8601 proposed |
-| Status values (measured / estimated / demo / unavailable) | Observation `measured`/`unavailable`; prediction unavailable until validated; frontend agreement pending |
+| Observation route and response | `GET /api/observations?max_locations=3` (1–5); status/source/observations/message envelope |
+| Prediction route and response | `GET /api/predict` returns unavailable until model validation |
+| AQI scale/category definition | Not returned or calculated until a scale is selected |
+| Pollutant names and units | Provider names/units pass through unchanged |
+| Timestamp format and timezone | Timezone-aware UTC ISO 8601 |
+| Status values (measured / estimated / demo / unavailable) | Observation `measured`/`unavailable`; prediction unavailable until validated; no demo records served |
 | Source and station fields | OpenAQ source/provider, station/sensor IDs, coordinates, coverage, and attribution |
-| Empty result and error response | Unavailable empty list; structured error envelope implemented; frontend agreement pending |
+| Empty result and error response | HTTP 200 unavailable empty list; errors `{error:{code,message,field_errors?}}`, status 422/502/503/500 |
 | Local and deployed origin/routing | Same-origin default; local CORS uses `AIRSYNC_CORS_ORIGINS`; combined deployment pending |
 
 ## Backend starter prompt

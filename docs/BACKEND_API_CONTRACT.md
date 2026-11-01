@@ -1,6 +1,6 @@
-# AirSync backend API contract proposal
+# AirSync backend/frontend API contract v1
 
-**Status: Proposal in use by the frontend, with details still pending agreement.** The frontend developer reports that the UI is wired to these proposed routes. The backend response shapes are implemented, but cross-computer browser integration and agreement on AQI, units, and error/empty handling remain to be reviewed. No data source or prediction method is claimed to be ready.
+**Status: Backend v1 contract finalized for integration.** The frontend developer reports that the UI is wired to these routes. This document locks the backend's health, observation, prediction, empty, and error behavior for v1. AQI is deliberately omitted until the project selects a scale. The frontend workspace is not available here, so browser-level integration still needs confirmation there.
 
 ## Implemented routes
 
@@ -49,9 +49,9 @@ With `AIRSYNC_ENABLE_OPENAQ` unset or false, returns HTTP 200 with an explicit e
 }
 ```
 
-With the feature enabled and an authorized `OPENAQ_API_KEY`, it requests latest sensor metadata for up to `max_locations` (default 3, maximum 5) Delhi monitoring locations and returns normalized measured records. The route performs at most one location page lookup and uses a three-second timeout per provider call. It returns 503 if the key is missing/invalid or the provider rate-limits the request, 502 for other upstream failures, and 422 for an invalid location limit. A provider `Retry-After` header is forwarded when available. It does not cache or poll automatically. The response message states that this bounded station sample is not complete Delhi coverage. The response shape is implemented as a proposal and still needs frontend agreement before it is treated as the shared contract.
+With the feature enabled and an authorized `OPENAQ_API_KEY`, it requests latest sensor metadata for up to `max_locations` (default 3, maximum 5) Delhi monitoring locations and returns normalized measured records. The route performs at most one location page lookup and uses a three-second timeout per provider call. It returns 503 if the key is missing/invalid or the provider rate-limits the request, 502 for other upstream failures, and 422 for an invalid location limit. A provider `Retry-After` header is forwarded when available. It does not cache or poll automatically. The response message states that this bounded station sample is not complete Delhi coverage. This is the v1 response contract for frontend integration.
 
-## Proposed observation record
+## Observation record
 
 ```json
 {
@@ -76,13 +76,13 @@ With the feature enabled and an authorized `OPENAQ_API_KEY`, it requests latest 
       "attribution_url": "<credit URL or null>"
     }
   ],
-  "coverage": "<source-provided coverage object or null>"
+  "coverage": null
 }
 ```
 
-The zero and angle-bracket values above are schema examples only, not readings. The proposed initial source adapter is OpenAQ v3, which requires a registered API key and exposes underlying provider and license details. The final pollutant vocabulary, units, nullability, AQI mapping, timestamp rules, and station fields must follow source terms and frontend agreement.
+The zero and angle-bracket values above are schema examples only, not readings. The initial source adapter is OpenAQ v3, which requires a registered API key and exposes underlying provider and license details. For v1, pollutant names and units are passed through from the provider with no conversion. Timestamps are timezone-aware UTC ISO 8601. AQI/category fields are not returned or calculated. Any later change to field names or unit conversion requires coordination with the frontend.
 
-## Proposed query and response behavior
+## V1 response behavior
 
 - `/api/observations` returns `status: "unavailable"` when disabled or when no valid readings are found. `max_locations` is bounded from 1 to 5 to constrain provider calls.
 - Invalid query parameters return HTTP 422 with a consistent `error.code`, `error.message`, and `error.field_errors` envelope.
@@ -93,6 +93,24 @@ The zero and angle-bracket values above are schema examples only, not readings. 
 - Every observation should carry its source, station identity/location, pollutant, unit, timestamp, and `measured` status.
 - `/api/predict` is defined as a contract endpoint but always returns unavailable until a method has sufficient trusted data and validation. The IDW helper is not wired into the route.
 - Response models reject inconsistent envelopes: unavailable collections cannot contain readings; measured collections require at least one measured record and a source; estimated predictions require a value and method; unavailable predictions cannot include a value.
+
+## Frontend field mapping
+
+| Frontend use | Contract fields | Handling |
+|---|---|---|
+| Place a station marker | `observations[].station.latitude`, `observations[].station.longitude` | Coordinates are WGS 84 decimal degrees. |
+| Identify the marker | `observations[].station.id`, `name`, `sensor_id` | Treat IDs as strings. |
+| Dashboard pollutant value | `observations[].pollutant`, `value`, `unit` | Display the source unit exactly; do not convert it to AQI. |
+| Data provenance/time | `status`, `source`, `provider`, `observed_at`, `attribution` | Preserve `measured`; show source and timestamp. |
+| Coverage note | collection `message`, record `coverage` | Coverage may be null; do not infer complete city coverage. |
+| Empty/loading/error states | collection `status`, `message`; error `error.code`, `error.message`, optional `field_errors` | `unavailable` with an empty list is a valid HTTP 200 empty state. |
+| Estimated dashboard values | `/api/predict` response | Currently unavailable; display no estimated value. |
+
+Do not derive AQI, category, confidence, or safety labels from these pollutant readings in v1. The source unit is not an AQI scale.
+
+## Frontend origin and base URL
+
+Use relative `/api/...` paths for a same-origin deployment. For separate local development, configure `AIRSYNC_CORS_ORIGINS` to the exact origin serving the frontend (for example, `http://localhost:5500`) and set `apiBaseUrl` to the backend host. The current backend computer's development URL is `http://192.168.160.226:8000`; it is a private, potentially changing LAN address, not a production URL. The browser must be able to reach that computer and its firewall must permit port 8000.
 
 Example validation error:
 
@@ -112,15 +130,15 @@ Example validation error:
 
 | Decision | Current state |
 |---|---|
-| Observation route and query parameters | Backend v1 proposal: `GET /api/observations?max_locations=3` (1–5); frontend agreement pending |
-| Prediction route and semantics | Backend v1 proposal: `GET /api/predict?latitude=…&longitude=…&pollutant=…`; returns unavailable until a validated model exists; frontend agreement pending |
-| AQI scale/category definition | Pending |
-| Pollutant names and units | Source-dependent; pending |
-| Timestamp format and timezone | Backend v1 proposal: timezone-aware UTC ISO 8601; frontend agreement pending |
-| Data status values | Backend v1 proposal: `measured` or `unavailable`; `estimated` only after model validation |
-| Empty result and error envelope | Backend proposal implemented; frontend agreement pending |
+| Observation route and query parameters | V1: `GET /api/observations?max_locations=3` (1–5) |
+| Prediction route and semantics | V1: `GET /api/predict?latitude=…&longitude=…&pollutant=…`; unavailable until a model is validated |
+| AQI scale/category definition | Not selected; no AQI field or calculation in v1 |
+| Pollutant names and units | Source names/units passed through unchanged |
+| Timestamp format and timezone | Timezone-aware UTC ISO 8601 |
+| Data status values | Observation: `measured` or `unavailable`; prediction: `unavailable` until validation |
+| Empty result and error envelope | Empty uses HTTP 200 and `status: unavailable`; errors use `{error:{code,message,field_errors?}}` |
 | Source and station fields | OpenAQ source/provider, station/sensor IDs, coordinates, units, coverage, and attribution |
-| Browser origin/CORS and deployment routing | Same-origin by default; local exact origins configurable via `AIRSYNC_CORS_ORIGINS`; combined deployment not configured |
+| Browser origin/CORS and deployment routing | Same-origin in production; exact local origins use `AIRSYNC_CORS_ORIGINS`; combined deployment not configured |
 
 ## Source references
 
@@ -130,4 +148,4 @@ Example validation error:
 - [OpenAQ sensors-by-location endpoint](https://docs.openaq.org/api/operations/sensors_get_v3_locations__locations_id__sensors_get) documents sensor parameters, units, latest value, timestamps, and coordinates.
 - [OpenAQ rate limits](https://docs.openaq.org/using-the-api/rate-limits) document 60 requests/minute and 2,000 requests/hour for general use. The one-shot adapter caps itself at 20 station sensor lookups plus a maximum of five location pages and does not poll continuously.
 
-The adapter is implemented as an opt-in API route and one-shot CLI (`python -m api.ingestion`). No upstream calls occur unless `AIRSYNC_ENABLE_OPENAQ=true`. Before enabling it for the product, configure an authorized `OPENAQ_API_KEY`, review each returned provider/license, and agree the public response contract with the frontend developer.
+The adapter is implemented as an opt-in API route and one-shot CLI (`python -m api.ingestion`). No upstream calls occur unless `AIRSYNC_ENABLE_OPENAQ=true`. Before enabling it for the product, configure an authorized `OPENAQ_API_KEY` and review each returned provider/license. The frontend developer reports wiring the documented routes; verify them in the frontend browser before calling the integration complete.
