@@ -66,27 +66,23 @@ class ObservationCollection(BaseModel):
         return self
 
 
-class PredictionValue(BaseModel):
-    value: float = Field(allow_inf_nan=False, ge=0)
-    unit: str = Field(min_length=1)
-
-
 class PredictionResponse(BaseModel):
     status: Literal["estimated", "unavailable"]
     latitude: float = Field(allow_inf_nan=False, ge=-90, le=90)
     longitude: float = Field(allow_inf_nan=False, ge=-180, le=180)
     pollutant: str = Field(min_length=1)
-    prediction: PredictionValue | None = None
+    prediction: float | None = Field(default=None, allow_inf_nan=False, ge=0)
+    unit: str | None = None
     method: str | None = None
     coverage: dict[str, Any] | None = None
     message: str
 
     @model_validator(mode="after")
     def validate_prediction_status(self) -> "PredictionResponse":
-        if self.status == "estimated" and (self.prediction is None or not self.method):
-            raise ValueError("An estimated response must include a prediction and method.")
-        if self.status == "unavailable" and self.prediction is not None:
-            raise ValueError("An unavailable response cannot include a prediction.")
+        if self.status == "estimated" and (self.prediction is None or not self.unit or not self.method):
+            raise ValueError("An estimated response must include a numeric prediction, unit, and method.")
+        if self.status == "unavailable" and (self.prediction is not None or self.unit is not None):
+            raise ValueError("An unavailable response cannot include a prediction or unit.")
         return self
 
 

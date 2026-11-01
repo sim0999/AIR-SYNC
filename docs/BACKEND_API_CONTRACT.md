@@ -1,6 +1,6 @@
 # AirSync backend/frontend API contract v1
 
-**Status: Backend v1 contract finalized for integration.** The frontend developer reports that the UI is wired to these routes. This document locks the backend's health, observation, prediction, empty, and error behavior for v1. AQI is deliberately omitted until the project selects a scale. The frontend workspace is not available here, so browser-level integration still needs confirmation there.
+**Status: Joint v1 contract confirmed on 2026-11-01.** The frontend branch records acceptance and route wiring. This document locks the backend's health, observation, prediction, empty, and error behavior for v1. AQI is deliberately omitted until the project selects a scale. The frontend checklist still has the connected UI empty-state review open.
 
 ## Implemented routes
 
@@ -30,6 +30,7 @@ Example unavailable response:
   "longitude": 77.209,
   "pollutant": "PM2.5",
   "prediction": null,
+  "unit": null,
   "method": null,
   "coverage": null,
   "message": "No validated spatial model is available; no estimate is provided."
@@ -92,7 +93,8 @@ The zero and angle-bracket values above are schema examples only, not readings. 
 - The draft one-shot CLI prints an empty `observations` list with `status: "unavailable"` when no valid records are returned, and exits with an error message on upstream failure.
 - Every observation should carry its source, station identity/location, pollutant, unit, timestamp, and `measured` status.
 - `/api/predict` is defined as a contract endpoint but always returns unavailable until a method has sufficient trusted data and validation. The IDW helper is not wired into the route.
-- Response models reject inconsistent envelopes: unavailable collections cannot contain readings; measured collections require at least one measured record and a source; estimated predictions require a value and method; unavailable predictions cannot include a value.
+- Prediction responses use a flat numeric `prediction` and sibling top-level `unit`, matching the frontend renderer. Both are null for `unavailable`; an `estimated` response requires a value, unit, and method.
+- Response models reject inconsistent envelopes: unavailable collections cannot contain readings; measured collections require at least one measured record and a source; estimated predictions require a value, unit, and method; unavailable predictions cannot include a value or unit.
 
 ## Frontend field mapping
 

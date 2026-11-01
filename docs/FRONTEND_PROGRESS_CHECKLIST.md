@@ -6,69 +6,78 @@ This document is for the person working on the `frontend` branch in the frontend
 
 - **Branch:** `frontend`
 - **Workspace reviewed:** `C:\Users\ry105\OneDrive\Desktop\New folder\AIR-SYNC`
-- **Current phase:** Phase 1 — UI foundation
-- **Phase 1 status:** Not started
-- **Audit finding:** The workspace has an empty root `index.html`, a minimal `README.md`, and project documentation. No frontend CSS or JavaScript implementation is present yet.
+- **Current phase:** Phase 5 — Backend API integration (backend reachable; connected UI empty-state review pending)
+- **Phase 1 status:** Complete
+- **Audit finding:** The workspace initially had no frontend implementation. Phase 1 now has a root page with separate CSS and JavaScript files.
 
 ## Phase 1 — UI foundation
 
-**Status:** Not started
+**Status:** Complete
 
-- [ ] Create the semantic page structure and AirSync branding/navigation.
-- [ ] Add the “Breathe Better. Know Your Air.” hero and concise project description.
-- [ ] Add location search, Search, and Use My Location controls.
-- [ ] Add an AQI summary and map container.
-- [ ] Explain measured observations versus modelled estimates; include the footer.
-- [ ] Keep HTML, CSS, and JavaScript separate; use accessible labels and unique IDs.
-- [ ] Label all sample values as demo data; do not imply measurements are live.
-- [ ] Preview and review this phase before moving on.
+- [x] Create the semantic page structure and AirSync branding/navigation.
+- [x] Add the “Breathe Better. Know Your Air.” hero and concise project description.
+- [x] Add location search, Search, and Use My Location controls.
+- [x] Add an AQI summary and map container.
+- [x] Explain measured observations versus modelled estimates; include the footer.
+- [x] Keep HTML, CSS, and JavaScript separate; use accessible labels and unique IDs.
+- [x] Label all sample values as demo data; do not imply measurements are live.
+- [x] Preview and review this phase before moving on.
 
 **Exit check:** All page sections exist, assets/scripts load, and demo content is clearly identified.
 
 ## Phase 2 — Interactive map
 
-**Status:** Not started
+**Status:** Complete
 
-- [ ] Integrate Leaflet with OpenStreetMap and centre the map on Delhi.
-- [ ] Add pan/zoom controls and a readable legend.
-- [ ] Add clearly labelled demo station markers and an estimated-area treatment.
-- [ ] Visually distinguish observed, estimated, and demo information.
-- [ ] Keep map behavior in a dedicated module.
-- [ ] Review map behavior before moving on.
+- [x] Integrate Leaflet with OpenStreetMap and centre the map on Delhi.
+- [x] Add pan/zoom controls and a readable legend.
+- [x] Add clearly labelled demo station markers and an estimated-area treatment.
+- [x] Visually distinguish observed, estimated, and demo information.
+- [x] Keep map behavior in a dedicated module.
+- [x] Review map behavior before moving on.
 
 **Exit check:** The map works and the legend makes each data type clear.
 
 ## Phase 3 — AQI dashboard
 
-**Status:** Not started
+**Status:** Complete
 
-- [ ] Show AQI/category, PM2.5, and PM10.
-- [ ] Show selected location and coordinates where useful.
-- [ ] Show source, timestamp, and status/coverage when available.
-- [ ] Label demo values and avoid invented accuracy/confidence claims.
+- [x] Show AQI/category, PM2.5, and PM10.
+- [x] Show the default Delhi view and approximate map-centre coordinates.
+- [x] Show source, timestamp, and status/coverage when available; identify unavailable values honestly.
+- [x] Label demo values and avoid invented accuracy/confidence claims.
 
 **Exit check:** Every displayed value has an honest status and provenance or is explicitly demo content.
 
 ## Phase 4 — Search and device location
 
-**Status:** Not started
+**Status:** Complete — OpenStreetMap Nominatim selected by the project owner.
 
-- [ ] Integrate a geocoding provider only after it is selected/configured by the team.
-- [ ] Add browser geolocation to Use My Location.
-- [ ] Show permission, loading, success, no-result, and error states.
-- [ ] Keep selected location and map in sync.
+- [x] Integrate OpenStreetMap Nominatim for user-submitted searches; do not add autocomplete.
+- [x] Add browser geolocation to Use My Location; request permission only after the user clicks.
+- [x] Show geolocation permission, loading, success, timeout, and error feedback, plus geocoder loading, results, no-result, and service-error states.
+- [x] Keep selected place/device location and map/dashboard context in sync; hide Delhi-only demo overlays when showing another location.
+- [x] Keep location behavior in dedicated `location.js` and `map.js` modules.
+- [x] Disclose that submitted place searches go to Nominatim; warn users not to enter private or confidential details.
+- [x] Limit requests to one per 1.1 seconds per page and cache repeated queries in memory.
+
+**Deployment note:** Per-page throttling does not enforce a limit across all visitors. Before public deployment or increased traffic, route searches through a backend proxy with shared caching/rate limiting or switch to a provider suited to the app's usage. Nominatim autocomplete is prohibited.
 
 **Exit check:** Search and device location handle expected states without hardcoded secrets or fabricated results.
 
 ## Phase 5 — Backend API integration
 
-**Status:** In progress; frontend developer reports that the UI is wired to the backend route names. Backend v1 payload and error/empty behavior are now documented; browser-level verification remains open and AQI is intentionally uncalculated.
+**Status:** In progress — frontend and backend contract v1 is jointly recorded and the route/CORS checks pass. The connected UI empty-state review and live readings remain open.
 
-- [x] Establish the backend v1 JSON response shape and route names in [Backend API Contract v1](BACKEND_API_CONTRACT.md); frontend developer reports wiring the route names.
-- [ ] Verify the dedicated API module uses the v1 paths and configurable base URL in the frontend workspace.
-- [ ] Handle loading, success, empty, and error responses.
-- [ ] Map response fields to the dashboard without inventing missing measurements.
-- [ ] Document any backend contract mismatch for coordination.
+- [x] Record the backend v1 route names, response shape, status semantics, and source units below.
+- [x] Add a dedicated API module for `/api/health`, `/api/observations?max_locations=3`, and `/api/predict`.
+- [x] Handle loading, unavailable, empty, malformed, timeout, and network-error responses.
+- [x] Map measured observations to station markers and dashboard fields without inventing measurements.
+- [x] Keep AQI uncalculated because the project has not selected a scale; only display estimates explicitly marked `estimated` and carrying a unit.
+- [x] Confirm backend health and observations responses, frontend preview response, and CORS preflight from this machine.
+- [ ] Review the connected UI in a browser, including its unavailable-observations state.
+- [x] Record frontend acceptance and AQI deferral in [API_CONTRACT.md](API_CONTRACT.md).
+- [x] Obtain backend developer confirmation; see the signed-off backend semantics in [API_CONTRACT.md](API_CONTRACT.md).
 
 **Exit check:** Frontend uses the agreed contract and preserves source, timestamp, units, and measured/estimated status.
 
@@ -88,39 +97,39 @@ This document is for the person working on the `frontend` branch in the frontend
 
 | Phase | Status | Notes |
 |---|---|---|
-| 1. UI foundation | Not started | Current phase |
-| 2. Interactive map | Not started | |
-| 3. AQI dashboard | Not started | |
-| 4. Search and device location | Not started | |
-| 5. Backend API integration | In progress | Backend v1 route, field, unit, timestamp, status, empty/error, and CORS behavior are documented in `BACKEND_API_CONTRACT.md`; route wiring is reported by frontend developer; browser-level connection and UI field mapping remain to verify. AQI is omitted pending scale selection. |
+| 1. UI foundation | Complete | Browser preview reviewed at mobile width; demo labels and placeholder control feedback confirmed |
+| 2. Interactive map | Complete | OSM tiles loaded; zoom controls and a demo marker popup reviewed in browser; attribution visible |
+| 3. AQI dashboard | Complete | Browser review confirmed demo values, approximate map-centre location, demo-fixture source, unavailable timestamp, and unavailable coverage |
+| 4. Search and device location | Complete | Nominatim place search and map selection reviewed with a Delhi query; device permission path remains user-triggered and was not invoked during review. |
+| 5. Backend API integration | In progress | `http://192.168.160.226:8000/api/health` returned 200 (`status: ok`); `/api/observations?max_locations=3` returned 200 with unavailable status and an empty list; CORS preflight for `http://localhost:5500` returned 200. Frontend page returned 200. Backend v1 contract is confirmed; live readings and connected UI empty-state review remain pending. |
 | 6. Accessibility and integration readiness | Not started | |
 
 ## Branch coordination rules
 
 - Do frontend work and commits on `frontend`; do not commit backend implementation on this branch.
 - Keep UI structure and styling independent of backend internals.
-- Use the documented backend v1 routes and field semantics; coordinate any requested contract changes before relying on them.
+- Follow the jointly recorded API paths, field names, units, timestamps, and status labels; coordinate any later contract revisions.
 - Use demo fixtures only when clearly labelled; never present them as real air-quality observations.
 - Merge branches only when both sides are ready and the integration structure has been agreed.
 
-## Shared API contract v1 (frontend review during integration)
+## Joint frontend/backend API acceptance
 
-The table below records the backend v1 contract for the routes the frontend developer reports wiring. The frontend workspace is separate and was not available for direct browser review here; confirm behavior during integration and record any needed changes before treating the full connection as verified.
+The frontend accepts and the backend confirms the v1 routes and fields in this table. Full details are in [API Contract](API_CONTRACT.md).
 
-| Decision | Backend v1 contract |
+| Decision | Agreed value |
 |---|---|
-| Health route and response | V1: `GET /api/health` → `{"status":"ok","service":"airsync-api"}` |
-| Observation route and response | V1: `GET /api/observations?max_locations=3` (1–5); envelope has `status`, `source`, `observations`, `message`; unavailable returns an empty list |
-| Prediction route and response | V1: `GET /api/predict?latitude=…&longitude=…&pollutant=…`; returns `status: unavailable`, `prediction: null` until a model is validated |
-| AQI scale/category definition | Not returned or calculated in v1; add only after the project selects and documents a scale |
-| Pollutant names and units | Provider's names/units passed through unchanged |
-| Timestamp format and timezone | Timezone-aware UTC ISO 8601 |
-| Status values (measured / estimated / demo / unavailable) | Observations contain measured records or an unavailable empty state; prediction is unavailable until validation; no demo records are served |
-| Source and station fields | Source/provider, station and sensor IDs, coordinates, pollutant, unit, timestamp, coverage and attribution where available |
-| Empty result and error response | Empty: HTTP 200 and `status: unavailable`; errors: `{error:{code,message,field_errors?}}`; 422 invalid request, 502 upstream, 503 credentials/rate limit, 500 unexpected |
-| Local and deployed origin/routing | Same-origin in production; exact local origins configured using `AIRSYNC_CORS_ORIGINS`; combined deployment not configured |
+| Health route and response | Frontend accepts `GET /api/health`; verified response is `{"status":"ok","service":"airsync-api"}` |
+| Observation route and response | Frontend accepts `GET /api/observations?max_locations=3`; limit 1–5; collection has `status`, `source`, `observations`, `message` |
+| Prediction route and response | Frontend accepts `GET /api/predict?latitude=…&longitude=…&pollutant=…`; remains unavailable until a model passes validation; estimated values require a unit |
+| AQI scale/category definition | No scale chosen; accepted scope is no AQI calculation or category until a separate team decision |
+| Pollutant names and units | Preserve provider-defined names and units without conversion |
+| Timestamp format and timezone | UTC ISO 8601 |
+| Status values (measured / estimated / demo / unavailable) | Source readings use `measured`; predictions use `estimated` only after validation; unavailable results use `unavailable`; demo overlays are frontend-only |
+| Source and station fields | Observation: `status`, `pollutant`, `value`, `unit`, `observed_at`, `source`, `provider`, `station`, `attribution`, `coverage`; station: `id`, `name`, `latitude`, `longitude`, `sensor_id` |
+| Empty result and error response | Unavailable observations return status, null source, empty list, and message; errors use `{error:{code,message,field_errors?}}`; invalid limits return structured HTTP 422 |
+| Local and deployed origin/routing | Backend at `http://192.168.160.226:8000`; configured as `AIRSYNC_CONFIG.apiBaseUrl`; CORS preflight from `http://localhost:5500` verified successfully |
 
-Full field mapping and examples are in [Backend API Contract v1](BACKEND_API_CONTRACT.md). The frontend developer should verify the actual browser connection and flag any mismatch found.
+Frontend acceptance and backend confirmation are recorded in [API_CONTRACT.md](API_CONTRACT.md). The connected UI empty-state review is the remaining Phase 5 frontend check.
 
 See [AirSync Project Plan](AirSync_Project_Plan.md) for product scope and data-integrity principles, and [Backend Progress Checklist](BACKEND_PROGRESS_CHECKLIST.md) for the other branch's work plan and starter prompt.
 
